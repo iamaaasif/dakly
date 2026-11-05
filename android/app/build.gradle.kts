@@ -25,7 +25,7 @@ android {
         versionCode = versions.getProperty("versionCode").toInt()
         versionName = versions.getProperty("versionName")
         // Server root; change for staging with -PdaklyApi=https://staging.example.com
-        buildConfigField("String", "API_BASE", "\"${findProperty("daklyApi") ?: "https://app.dakly.com.bd"}\"")
+        buildConfigField("String", "API_BASE", "\"${findProperty("daklyApi") ?: "https://dakly.wowapps.io"}\"")
         resourceConfigurations += listOf("en", "bn")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -67,6 +67,25 @@ android {
     lint {
         abortOnError = false
     }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+}
+
+// Screen-by-screen walkthrough on the JVM (Robolectric) against a running backend:
+//   ./gradlew :app:testDebugUnitTest -PdaklyApi=http://localhost:3000 -Pwalkthrough
+// Screenshots land in app/build/walkthrough/. Skipped unless -Pwalkthrough is given.
+tasks.withType<Test>().configureEach {
+    systemProperty("roborazzi.test.record", "true")
+    systemProperty("dakly.walkthrough", if (project.hasProperty("walkthrough")) "true" else "false")
+    systemProperty("dakly.walkthrough.dir", layout.buildDirectory.dir("walkthrough").get().asFile.absolutePath)
+    systemProperty("dakly.email", findProperty("daklyEmail") ?: "")
+    systemProperty("dakly.password", findProperty("daklyPassword") ?: "")
+    // Optional: fetch Robolectric's Android runtime from a Maven Central mirror (-ProbolectricRepo=https://...).
+    (findProperty("robolectricRepo") as String?)?.let { systemProperty("robolectric.dependency.repo.url", it) }
+    // each walkthrough starts like a fresh install (the session store is a process-wide singleton)
+    if (project.hasProperty("walkthrough")) forkEvery = 1
+    maxHeapSize = "3g"
 }
 
 dependencies {
@@ -91,4 +110,11 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.okhttp.logging)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }

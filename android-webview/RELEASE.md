@@ -3,7 +3,7 @@
 ## Before you upload (one time)
 
 1. **Back up the signing key.** `signing/dakly-upload.jks` and `signing/keystore.properties` (password inside) are the upload key. Keep 2 copies off this server (e.g. password manager + encrypted drive). If it is lost you can ask Google to reset the upload key, but it takes days.
-2. **Server is live on `https://app.dakly.com.bd`** with HTTPS, and `https://app.dakly.com.bd/.well-known/assetlinks.json` returns the JSON (it does by default once the backend is deployed).
+2. **Server is live on `https://dakly.wowapps.io`** with HTTPS, and `https://dakly.wowapps.io/.well-known/assetlinks.json` returns the JSON (it does by default once the backend is deployed).
 3. **Privacy policy page** and **account deletion page** are live on the web (Play requires both, see the URLs in the thread).
 4. A Google Play developer account (one-time USD 25). A new *personal* account must run a closed test with at least 12 testers for 14 days before production; an *organization* account (needs a D-U-N-S number) skips that.
 

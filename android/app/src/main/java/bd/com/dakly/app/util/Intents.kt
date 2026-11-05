@@ -58,7 +58,7 @@ object Contact {
 
 /** Opens a web page in a Chrome Custom Tab (used for Facebook connect, privacy policy, help). */
 object Web {
-    fun open(context: Context, url: String, toolbarColor: Int = 0xFF13261D.toInt()) {
+    fun open(context: Context, url: String, toolbarColor: Int = 0xFF070707.toInt()) {
         val params = CustomTabColorSchemeParams.Builder().setToolbarColor(toolbarColor).build()
         val tab = CustomTabsIntent.Builder().setDefaultColorSchemeParams(params).setShowTitle(true).build()
         try {

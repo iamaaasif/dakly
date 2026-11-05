@@ -91,7 +91,9 @@ import bd.com.dakly.app.ui.theme.Dakly
 import bd.com.dakly.app.ui.toast
 import bd.com.dakly.app.ui.toastError
 import bd.com.dakly.app.util.Format
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -182,7 +184,7 @@ fun CampaignWizardScreen(nav: NavHostController, initialSegment: String?, initia
     ) { inner ->
         Column(Modifier.padding(inner).fillMaxSize().imePadding()) {
             LinearProgressIndicator(
-                progress = { (step + 1f) / steps }, color = Dakly.colors.dak, trackColor = Dakly.colors.sunk,
+                progress = { (step + 1f) / steps }, color = Dakly.colors.accent, trackColor = Dakly.colors.sunk,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(4.dp).clip(RoundedCornerShape(2.dp)),
             )
             LoadContent(audience.value, audience::reload) { a ->
@@ -224,7 +226,7 @@ fun CampaignWizardScreen(nav: NavHostController, initialSegment: String?, initia
                                     try { message = repo.aiMessage(segment, offer.trim(), if (voice) "voice" else "text").text } catch (e: Exception) { ctx.toastError(e) } finally { writing = false }
                                 }
                             }
-                            if (writing) LinearProgressIndicator(Modifier.fillMaxWidth(), color = Dakly.colors.dak)
+                            if (writing) LinearProgressIndicator(Modifier.fillMaxWidth(), color = Dakly.colors.accent)
                             Field(message, { message = it }, stringResource(R.string.wizard_message_field), singleLine = false, minLines = 6,
                                 supporting = stringResource(R.string.wizard_placeholders))
                         }
@@ -272,22 +274,25 @@ fun CampaignWizardScreen(nav: NavHostController, initialSegment: String?, initia
                         if (step < steps - 1) { step++; return@PrimaryButton }
                         sending = true
                         scope.launch {
-                            try {
-                                val r = repo.createCampaign(
+                            // Only the network call is guarded: once the server has accepted the campaign,
+                            // nothing after it may show an error (the seller could send it twice).
+                            val r = try {
+                                repo.createCampaign(
                                     NewCampaign(
                                         name = name.ifBlank { null }, segment = segment, message = message.trim(),
                                         channels = channelsFor(voice, wa, sms), `when` = if (later) "later" else "now",
                                         sendAt = if (later) sendAt else null,
                                     ),
                                 )
-                                ctx.toast(ctx.getString(if (later) R.string.wizard_scheduled_ok else R.string.wizard_sent_ok))
-                                nav.popBackStack()
-                                nav.navigate(Routes.campaign(r.id))
-                            } catch (e: ApiException) {
-                                ctx.toastError(e)
                             } catch (e: Exception) {
                                 ctx.toastError(e)
+                                null
                             } finally { sending = false }
+                            if (r != null) withContext(Dispatchers.Main) {
+                                ctx.toast(ctx.getString(if (later) R.string.wizard_scheduled_ok else R.string.wizard_sent_ok))
+                                // One navigation that replaces the wizard: no double transition, so a quick back tap is safe.
+                                nav.navigate(Routes.campaign(r.id)) { popUpTo(Routes.NEW_CAMPAIGN) { inclusive = true } }
+                            }
                         }
                     }
                 }
@@ -336,18 +341,18 @@ private fun channelsFor(voice: Boolean, wa: Boolean, sms: Boolean): List<String>
 
 @Composable
 fun SelectRow(
-    selected: Boolean, title: String, body: String?, trailing: String? = null, accent: Color = Dakly.colors.dak,
+    selected: Boolean, title: String, body: String?, trailing: String? = null, accent: Color = Dakly.colors.accent,
     enabled: Boolean = true, onClick: () -> Unit,
 ) {
     val shape = RoundedCornerShape(14.dp)
     Row(
         Modifier.fillMaxWidth().clip(shape)
-            .background(if (selected) Dakly.colors.dakSoft else Dakly.colors.surface)
-            .border(1.dp, if (selected) Dakly.colors.dak else Dakly.colors.line, shape)
+            .background(if (selected) Dakly.colors.accentSoft else Dakly.colors.surface)
+            .border(1.dp, if (selected) Dakly.colors.accent else Dakly.colors.line, shape)
             .clickable(enabled = enabled, onClick = onClick).padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(if (selected) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked, null, tint = if (selected) Dakly.colors.dak else Dakly.colors.ink3)
+        Icon(if (selected) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked, null, tint = if (selected) Dakly.colors.accent else Dakly.colors.ink3)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontWeight = FontWeight.SemiBold, color = if (enabled) Dakly.colors.ink else Dakly.colors.ink3)
@@ -360,7 +365,7 @@ fun SelectRow(
 @Composable
 private fun CheckRow(checked: Boolean, title: String, note: String?, onChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth().clickable { onChange(!checked) }.padding(start = 28.dp), verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(checked, onChange, colors = CheckboxDefaults.colors(checkedColor = Dakly.colors.dak))
+        Checkbox(checked, onChange, colors = CheckboxDefaults.colors(checkedColor = Dakly.colors.accent))
         Column {
             Text(title)
             if (note != null) Text(note, color = Dakly.colors.haldi, fontSize = 12.sp)
@@ -407,7 +412,7 @@ fun CampaignDetailScreen(nav: NavHostController, id: String) {
                         }
                         item {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                StatTile(Format.number(ctx, c.summary.interested), stringResource(R.string.st_interested), Modifier.weight(1f), Dakly.colors.dak)
+                                StatTile(Format.number(ctx, c.summary.interested), stringResource(R.string.st_interested), Modifier.weight(1f), Dakly.colors.accent)
                                 StatTile(Format.number(ctx, c.summary.failed), stringResource(R.string.st_failed), Modifier.weight(1f))
                                 StatTile(Format.number(ctx, c.summary.test + c.summary.skipped), stringResource(R.string.cs_test_skipped), Modifier.weight(1f))
                             }
@@ -423,7 +428,7 @@ fun CampaignDetailScreen(nav: NavHostController, id: String) {
                                     Column(Modifier.weight(1f)) {
                                         Text(m.customer?.name.orEmpty(), fontWeight = FontWeight.SemiBold)
                                         Text(Format.phone(m.customer?.phone) + " · " + stringResource(channelLabel(m.channel)), color = Dakly.colors.ink3, fontSize = 12.sp)
-                                        if (!m.error.isNullOrBlank()) Text(m.error, color = Dakly.colors.dak, fontSize = 12.sp)
+                                        if (!m.error.isNullOrBlank()) Text(m.error, color = Dakly.colors.bad, fontSize = 12.sp)
                                     }
                                     val (f, b) = statusColors(m.status)
                                     Pill(stringResource(statusLabel(m.status)), f, b)

@@ -37,7 +37,7 @@ export default async function Customers({ searchParams }: { searchParams: Promis
         {SEGMENT_KEYS.map((k) => <Link key={k} className={`chip ${filter === k ? "on" : ""}`} href={href(k)}>{SEGMENTS[k].label} · {bn(seg[k])}</Link>)}
       </div>
       {filter === "inactive" && seg.inactive > 0 && (
-        <div className="note-ai"><Icon name="spark" size={16} /><div>{t("এই {n} জন ৬০ দিনের বেশি কেনেননি। একটা Winback Offer পাঠালে অনেকে ফিরতে পারেন।", { n: seg.inactive })} <Link href="/campaigns/new?segment=inactive" style={{ color: "var(--dak)", fontWeight: 600 }}>{t("Winback পাঠান")} →</Link></div></div>
+        <div className="note-ai"><Icon name="spark" size={16} /><div>{t("এই {n} জন ৬০ দিনের বেশি কেনেননি। একটা Winback Offer পাঠালে অনেকে ফিরতে পারেন।", { n: seg.inactive })} <Link href="/campaigns/new?segment=inactive" style={{ color: "var(--accent)", fontWeight: 600 }}>{t("Winback পাঠান")} →</Link></div></div>
       )}
       {list.length ? (
         <div className="list">

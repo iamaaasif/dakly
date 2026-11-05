@@ -87,7 +87,7 @@ fun HomeScreen(nav: NavHostController) {
                 .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Avatar(me?.shop?.name, 38.dp, Dakly.colors.haldiSoft, Dakly.colors.haldi)
+            Avatar(me?.shop?.name, 38.dp, Dakly.colors.dak, Dakly.colors.dakInk)
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 Text(me?.shop?.name.orEmpty(), style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -96,7 +96,7 @@ fun HomeScreen(nav: NavHostController) {
             }
             val alerts = (data.value as? Load.Ready)?.data?.notifications?.size ?: 0
             IconButton(onClick = { nav.navigate(Routes.ALERTS) }) {
-                BadgedBox(badge = { if (alerts > 0) Badge(containerColor = Dakly.colors.dak) { Text("$alerts") } }) {
+                BadgedBox(badge = { if (alerts > 0) Badge(containerColor = Dakly.colors.dak, contentColor = Dakly.colors.dakInk) { Text("$alerts") } }) {
                     Icon(Icons.Outlined.Notifications, stringResource(R.string.alerts_title))
                 }
             }
@@ -140,7 +140,7 @@ private fun HomeContent(nav: NavHostController, d: Dashboard) {
                     IconBubble(Icons.Outlined.ChatBubbleOutline, Dakly.colors.leaf, Dakly.colors.leafSoft)
                     Spacer(Modifier.width(12.dp))
                     Text(stringResource(R.string.home_unread_messages, Format.number(ctx, d.inboxUnread)), Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(R.string.open), color = Dakly.colors.dak, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.open), color = Dakly.colors.accent, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -228,9 +228,9 @@ private fun TipHero(tip: Tip, onAct: () -> Unit, onLater: () -> Unit) {
         Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Dakly.colors.hero).padding(18.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.AutoAwesome, null, tint = Dakly.colors.haldi, modifier = Modifier.size(16.dp))
+            Icon(Icons.Outlined.AutoAwesome, null, tint = Dakly.colors.dak, modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.home_ai_advice), color = Dakly.colors.haldi, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.home_ai_advice), color = Dakly.colors.dak, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.height(8.dp))
         Text(tip.title, color = Dakly.colors.heroFg, style = MaterialTheme.typography.headlineSmall)
@@ -243,7 +243,7 @@ private fun TipHero(tip: Tip, onAct: () -> Unit, onLater: () -> Unit) {
         Spacer(Modifier.height(14.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             androidx.compose.material3.Button(
-                onClick = onAct, shape = RoundedCornerShape(12.dp),
+                onClick = onAct, shape = androidx.compose.foundation.shape.CircleShape,
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Dakly.colors.dak, contentColor = Dakly.colors.dakInk),
             ) {
                 Icon(Icons.Outlined.Campaign, null, Modifier.size(18.dp))
@@ -271,7 +271,7 @@ private fun SalesCard(d: Dashboard) {
                     val up = change >= 0
                     Text(
                         (if (up) "▲ " else "▼ ") + Format.number(ctx, kotlin.math.abs(change).toInt()) + "%",
-                        color = if (up) Dakly.colors.leaf else Dakly.colors.dak, fontWeight = FontWeight.SemiBold,
+                        color = if (up) Dakly.colors.leaf else Dakly.colors.bad, fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(bottom = 4.dp),
                     )
                 }
@@ -285,7 +285,7 @@ private fun SalesCard(d: Dashboard) {
                 WeeksChart(d)
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    LegendDot(Dakly.colors.ink); Text(" " + stringResource(R.string.chart_new), fontSize = 12.sp, color = Dakly.colors.ink2)
+                    LegendDot(Dakly.colors.sky); Text(" " + stringResource(R.string.chart_new), fontSize = 12.sp, color = Dakly.colors.ink2)
                     Spacer(Modifier.width(12.dp))
                     LegendDot(Dakly.colors.dak); Text(" " + stringResource(R.string.chart_repeat), fontSize = 12.sp, color = Dakly.colors.ink2)
                 }
@@ -300,7 +300,7 @@ private fun LegendDot(c: androidx.compose.ui.graphics.Color) = Box(Modifier.size
 /** 12 weekly stacked bars: new-customer sales (ink) and repeat sales (dak). */
 @Composable
 private fun WeeksChart(d: Dashboard) {
-    val ink = Dakly.colors.ink
+    val ink = Dakly.colors.sky
     val dak = Dakly.colors.dak
     val track = Dakly.colors.sunk
     val max = (d.weeks.maxOfOrNull { it.fresh + it.repeat } ?: 0L).coerceAtLeast(1L)
@@ -339,7 +339,7 @@ fun IconBubble(icon: ImageVector, fg: androidx.compose.ui.graphics.Color, bg: an
 private fun QuickAction(icon: ImageVector, label: String, modifier: Modifier, onClick: () -> Unit) {
     DCard(modifier, onClick = onClick, padding = 12.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconBubble(icon, Dakly.colors.dak, Dakly.colors.dakSoft)
+            IconBubble(icon, Dakly.colors.accent, Dakly.colors.accentSoft)
             Spacer(Modifier.width(10.dp))
             Text(label, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 2)
         }

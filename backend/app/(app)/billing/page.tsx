@@ -26,7 +26,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
   const money = (x: { amount: number; currency: string }) => (x.currency === shop.currency ? f.money(x.amount) : f.digits(new Intl.NumberFormat(loc.lang === "bn" ? "en-IN" : "en-US", { style: "currency", currency: x.currency, maximumFractionDigits: 0 }).format(x.amount)));
   const [msgs, ai, pays] = await Promise.all([usedThisMonth(shop.id), aiUsedThisMonth(shop.id), db.payment.findMany({ where: { shopId: shop.id }, orderBy: { createdAt: "desc" }, take: 10 })]);
   const ml = messageLimit(shop), al = aiLimit(shop);
-  const bar = (u: number, l: number) => <div className="bar" style={{ marginTop: 6 }}><i style={{ width: `${Math.min(100, (u / Math.max(1, l)) * 100)}%`, background: u >= l ? "var(--dak)" : "var(--leaf)" }} /></div>;
+  const bar = (u: number, l: number) => <div className="bar" style={{ marginTop: 6 }}><i style={{ width: `${Math.min(100, (u / Math.max(1, l)) * 100)}%`, background: u >= l ? "var(--bad)" : "var(--leaf)" }} /></div>;
   return (
     <>
       <div className="greet"><h2>{t("Plan ও Payment")}</h2><p>{t("এখন:")} <b>{PLANS[plan].name}</b>{plan !== "free" && shop.planUntil ? ` · ${t("{d} পর্যন্ত", { d: f.date(shop.planUntil) })}` : ""}</p></div>
@@ -57,7 +57,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
       <p className="muted">{shop.currency === "BDT" ? t("bKash, Nagad, Rocket, Card বা Net Banking দিয়ে SSLCommerz-এর মাধ্যমে Payment।") : t("Card দিয়ে Stripe-এর মাধ্যমে Payment।")} {t("মেয়াদ শেষ হলে Free Plan-এ ফিরে যাবে, কোনো Data মুছবে না।")}</p>
       {pays.length > 0 && (
         <div className="tbl-wrap"><table className="tbl num"><thead><tr><th>{t("তারিখ")}</th><th>Plan</th><th>{t("টাকা")}</th><th>{t("অবস্থা")}</th><th>Transaction</th></tr></thead>
-          <tbody>{pays.map((p) => <tr key={p.id}><td>{f.dt(p.createdAt)}</td><td>{PLANS[p.plan as "free"]?.name} × {bn(p.months)}</td><td>{money(p)}</td><td><span className={`badge b-${p.status === "paid" || p.status === "manual" ? "sent" : p.status === "pending" ? "queued" : "failed"}`}>{t(PS[p.status] ?? p.status)}</span></td><td>{p.status === "paid" || p.status === "manual" ? <a href={`/billing/invoice/${p.id}`} target="_blank" style={{ color: "var(--dak)" }}>{p.tranId}</a> : p.tranId}</td></tr>)}</tbody></table></div>
+          <tbody>{pays.map((p) => <tr key={p.id}><td>{f.dt(p.createdAt)}</td><td>{PLANS[p.plan as "free"]?.name} × {bn(p.months)}</td><td>{money(p)}</td><td><span className={`badge b-${p.status === "paid" || p.status === "manual" ? "sent" : p.status === "pending" ? "queued" : "failed"}`}>{t(PS[p.status] ?? p.status)}</span></td><td>{p.status === "paid" || p.status === "manual" ? <a href={`/billing/invoice/${p.id}`} target="_blank" style={{ color: "var(--accent)" }}>{p.tranId}</a> : p.tranId}</td></tr>)}</tbody></table></div>
       )}
     </>
   );

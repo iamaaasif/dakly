@@ -45,7 +45,7 @@ export default async function Reports() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 0 }}>
           <div className="card">
             <div className="sec-h"><h3>{t("Message পাঠানোর সেরা সময়")}</h3></div>
-            <p style={{ margin: "4px 0 10px" }}><b style={{ color: "var(--dak)" }}>{bt.label}</b> <span className="muted">· {bt.basedOn}</span></p>
+            <p style={{ margin: "4px 0 10px" }}><b style={{ color: "var(--accent)" }}>{bt.label}</b> <span className="muted">· {bt.basedOn}</span></p>
             <HourStrip loc={loc} hist={bt.hist} best={bt.hour} />
           </div>
           <div className="card">

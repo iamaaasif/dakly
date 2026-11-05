@@ -2,6 +2,24 @@ package bd.com.dakly.app.ui
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -101,7 +119,7 @@ fun DaklyRoot(pendingPath: String?, onPathHandled: () -> Unit) {
 
     when (gate) {
         Gate.Checking -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Dakly.colors.dak)
+            CircularProgressIndicator(color = Dakly.colors.accent)
         }
         Gate.LoggedOut -> AuthScreen(onSignedIn = { scope.launch { gate = Gate.Checking; check() } })
         Gate.Blocked -> ShopStatusScreen(
@@ -177,6 +195,19 @@ private val tabs = listOf(
     Tab(Routes.MORE, R.string.tab_more, Icons.Outlined.Menu),
 )
 
+/**
+ * Tab label that always fits five tabs: follows the phone's text size up to 115%, then stops growing
+ * (at larger system sizes, labels like "Customers" were cut to "Custome").
+ */
+@Composable
+private fun TabLabel(text: String) {
+    val scale = LocalDensity.current.fontScale
+    Text(
+        text, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis, letterSpacing = 0.sp,
+        fontSize = (12f * minOf(1f, 1.15f / scale)).sp,
+    )
+}
+
 /** Opens a top-level tab the way bottom navigation should: one copy, state kept. */
 fun NavHostController.openTab(route: String) = navigate(route) {
     popUpTo(graph.findStartDestination().id) { saveState = true }
@@ -205,35 +236,72 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
         }
     }
 
+    // Phones: bottom bar. Tablets and landscape (>= 600dp wide): side rail, and content capped at a readable width.
+    val wide = LocalConfiguration.current.screenWidthDp >= 600
+    val tabColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = Dakly.colors.dakInk, selectedTextColor = Dakly.colors.ink,
+        indicatorColor = Dakly.colors.dak,
+        unselectedIconColor = Dakly.colors.ink3, unselectedTextColor = Dakly.colors.ink3,
+    )
+    val tabIcon: @Composable (Tab) -> Unit = { t ->
+        if (t.route == Routes.INBOX && unread > 0) {
+            BadgedBox(badge = { Badge(containerColor = Dakly.colors.dak, contentColor = Dakly.colors.dakInk) { Text(if (unread > 99) "99+" else "$unread") } }) {
+                Icon(t.icon, null)
+            }
+        } else Icon(t.icon, null)
+    }
+
     Scaffold(
         containerColor = Dakly.colors.paper,
         bottomBar = {
-            if (showBar) {
+            if (showBar && !wide) {
                 NavigationBar(containerColor = Dakly.colors.surface, tonalElevation = 0.dp) {
                     tabs.forEach { t ->
                         NavigationBarItem(
                             selected = current == t.route,
                             onClick = { nav.openTab(t.route) },
-                            icon = {
-                                if (t.route == Routes.INBOX && unread > 0) {
-                                    BadgedBox(badge = { Badge(containerColor = Dakly.colors.dak) { Text(if (unread > 99) "99+" else "$unread") } }) {
-                                        Icon(t.icon, null)
-                                    }
-                                } else Icon(t.icon, null)
-                            },
-                            label = { Text(stringResource(t.label), maxLines = 1) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Dakly.colors.dak, selectedTextColor = Dakly.colors.dak,
-                                indicatorColor = Dakly.colors.dakSoft,
-                                unselectedIconColor = Dakly.colors.ink3, unselectedTextColor = Dakly.colors.ink3,
-                            ),
+                            icon = { tabIcon(t) },
+                            label = { TabLabel(stringResource(t.label)) },
+                            colors = tabColors,
                         )
                     }
                 }
             }
         },
     ) { pad ->
-        NavHost(nav, startDestination = Routes.HOME, modifier = Modifier.padding(bottom = pad.calculateBottomPadding()).consumeWindowInsets(pad)) {
+        // Only the bottom (navigation bar) is handled here. Consuming all of `pad` would also mark the
+        // status bar as handled, and every screen header would then draw under the clock and icons.
+        val bottomPad = PaddingValues(bottom = pad.calculateBottomPadding())
+        Row(Modifier.fillMaxSize().padding(bottomPad).consumeWindowInsets(bottomPad)) {
+            if (showBar && wide) {
+                NavigationRail(containerColor = Dakly.colors.surface) {
+                    Spacer(Modifier.weight(1f))
+                    tabs.forEach { t ->
+                        NavigationRailItem(
+                            selected = current == t.route,
+                            onClick = { nav.openTab(t.route) },
+                            icon = { tabIcon(t) },
+                            label = { TabLabel(stringResource(t.label)) },
+                            colors = NavigationRailItemDefaults.colors(
+                                selectedIconColor = Dakly.colors.dakInk, selectedTextColor = Dakly.colors.ink,
+                                indicatorColor = Dakly.colors.dak,
+                                unselectedIconColor = Dakly.colors.ink3, unselectedTextColor = Dakly.colors.ink3,
+                            ),
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                }
+            }
+            Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.TopCenter) {
+        NavHost(
+            nav, startDestination = Routes.HOME,
+            modifier = Modifier.widthIn(max = 840.dp).fillMaxSize(),
+            // Short fades between tabs, a small slide for drill-down screens: smooth without feeling slow.
+            enterTransition = { fadeIn(tween(200)) + slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { it / 14 } },
+            exitTransition = { fadeOut(tween(120)) },
+            popEnterTransition = { fadeIn(tween(200)) },
+            popExitTransition = { fadeOut(tween(140)) + slideOutHorizontally(tween(220, easing = FastOutSlowInEasing)) { it / 14 } },
+        ) {
             composable(Routes.HOME) { HomeScreen(nav) }
             composable(Routes.CUSTOMERS) { CustomersScreen(nav) }
             composable(Routes.INBOX) { InboxScreen(nav, onUnread = { unread = it }) }
@@ -280,6 +348,8 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
             composable(Routes.SETTINGS) { SettingsScreen(nav, onLoggedOut) }
             composable(Routes.BILLING) { BillingScreen(nav) }
             composable(Routes.SUPPORT) { SupportScreen(nav) }
+        }
+            }
         }
     }
 }

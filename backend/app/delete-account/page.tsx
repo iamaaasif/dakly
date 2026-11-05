@@ -26,7 +26,7 @@ export default async function DeleteAccountInfo({ searchParams }: { searchParams
         </ol>
         <p style={{ marginTop: 8 }}><Link className="btn primary" href="/settings#delete">{bn ? "Settings-এ যান" : "Go to Settings"}</Link></p>
         <h2 style={{ fontSize: 19, marginTop: 20 }}>{bn ? "Login করতে না পারলে" : "If you cannot sign in"}</h2>
-        <p>{bn ? "যে Email দিয়ে Account খুলেছিলেন সেখান থেকে লিখুন" : "Email us from the address you signed up with:"} <a href={`mailto:${email}?subject=Delete%20my%20Dakly%20account`} style={{ color: "var(--dak)" }}>{email}</a>{bn ? "। ৭ দিনের মধ্যে মুছে দেওয়া হবে।" : ". We delete it within 7 days."}</p>
+        <p>{bn ? "যে Email দিয়ে Account খুলেছিলেন সেখান থেকে লিখুন" : "Email us from the address you signed up with:"} <a href={`mailto:${email}?subject=Delete%20my%20Dakly%20account`} style={{ color: "var(--accent)" }}>{email}</a>{bn ? "। ৭ দিনের মধ্যে মুছে দেওয়া হবে।" : ". We delete it within 7 days."}</p>
         <h2 style={{ fontSize: 19, marginTop: 20 }}>{bn ? "কী মুছে যায়" : "What is deleted"}</h2>
         <p>{bn
           ? "আপনার Login, দোকান, সব Customer আর Order, Campaign ও Message, WhatsApp কথোপকথন, Facebook Post, AI Knowledge, Store ও Facebook Connection, Support Ticket আর Payment-এর তথ্য। সাথে সাথে মূল Database থেকে মুছে যায়; Backup থেকে ৩০ দিনের মধ্যে।"

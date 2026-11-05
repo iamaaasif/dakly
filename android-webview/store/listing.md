@@ -39,8 +39,8 @@ Call customers back. Sell more.
 Add more languages in Play Console > Store presence > Store listings > Manage translations. Bengali (bn-BD) is the default listing for the Bangladesh launch.
 
 **Category:** Business · **Tags:** CRM, marketing, small business
-**Contact email:** (your support email) · **Website:** https://app.dakly.com.bd
-**Privacy policy URL:** https://app.dakly.com.bd/privacy (confirm once live)
+**Contact email:** (your support email) · **Website:** https://dakly.wowapps.io
+**Privacy policy URL:** https://dakly.wowapps.io/privacy (confirm once live)
 
 ## App content answers
 
@@ -49,7 +49,7 @@ Add more languages in Play Console > Store presence > Store listings > Manage tr
 - **Target audience:** 18+. Not designed for children.
 - **Content rating:** Questionnaire category "Utility, productivity, communication or other"; answer No to all content questions.
 - **News app / Government / Financial features / Health:** No.
-- **Account deletion URL:** https://app.dakly.com.bd/delete-account (confirm once live)
+- **Account deletion URL:** https://dakly.wowapps.io/delete-account (confirm once live)
 - **Permissions:** RECORD_AUDIO is used only when the seller taps the mic to add a customer by voice; audio is sent to Dakly's server for transcription and not stored on the phone.
 
 ### Data safety

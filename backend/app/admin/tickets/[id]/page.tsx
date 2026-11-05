@@ -13,7 +13,7 @@ export default async function TicketAdmin({ params }: { params: Promise<{ id: st
   if (!t) notFound();
   return (
     <>
-      <div><h1>{t.subject}</h1><p className="muted"><Link href={`/admin/merchants/${t.shopId}`} style={{ color: "var(--dak)" }}>{t.shop.name}</Link> · {t.shop.owner.email} · {t.status}</p></div>
+      <div><h1>{t.subject}</h1><p className="muted"><Link href={`/admin/merchants/${t.shopId}`} style={{ color: "var(--accent)" }}>{t.shop.name}</Link> · {t.shop.owner.email} · {t.status}</p></div>
       <div className="thread" style={{ maxWidth: 760 }}>
         {t.messages.map((m) => <div key={m.id} className={`msg ${m.fromStaff ? "me" : "them"}`}>{m.body}<small>{m.author.name} · {dateTimeBn(m.createdAt)}</small></div>)}
       </div>

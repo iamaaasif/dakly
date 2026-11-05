@@ -60,5 +60,5 @@ export function HourStrip({ loc, hist, best }: { loc: Loc; hist: number[]; best:
 export function Delta({ loc, now, prev }: { loc: Loc; now: number; prev: number }) {
   if (!prev) return null;
   const pct = Math.round(((now - prev) / prev) * 100);
-  return <span style={{ fontSize: 11.5, fontWeight: 600, color: pct >= 0 ? "var(--leaf)" : "var(--dak)" }}>{pct >= 0 ? "▲" : "▼"} {loc.t("{n}% আগের ৩০ দিন থেকে", { n: Math.abs(pct) })}</span>;
+  return <span style={{ fontSize: 11.5, fontWeight: 600, color: pct >= 0 ? "var(--leaf)" : "var(--bad)" }}>{pct >= 0 ? "▲" : "▼"} {loc.t("{n}% আগের ৩০ দিন থেকে", { n: Math.abs(pct) })}</span>;
 }

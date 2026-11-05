@@ -15,7 +15,7 @@ import { refreshTips } from "@/app/actions";
 import { aiEnabled } from "@/lib/ai";
 import { Onboarding } from "@/components/Onboarding";
 
-const COL = { vip: "var(--haldi)", regular: "var(--sky)", new: "var(--leaf)", inactive: "var(--dak)" };
+const COL = { vip: "var(--haldi)", regular: "var(--sky)", new: "var(--leaf)", inactive: "var(--bad)" };
 
 export default async function Home() {
   const { user, shop } = await requireShop();

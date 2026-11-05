@@ -32,7 +32,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         {mode === "login" && <Link href="/forgot" className="muted" style={{ textAlign: "right", marginTop: -6 }}>{t("Password ভুলে গেছেন?")}</Link>}
         <button className="btn primary block" disabled={pending}>{pending ? t("অপেক্ষা করুন…") : mode === "login" ? "Login" : t("Account খুলুন")}</button>
         <p className="muted" style={{ textAlign: "center" }}>
-          {mode === "login" ? <>{t("Account নেই?")} <Link href="/register" style={{ color: "var(--dak)", fontWeight: 600 }}>{t("নতুন খুলুন")}</Link></> : <>{t("Account আছে?")} <Link href="/login" style={{ color: "var(--dak)", fontWeight: 600 }}>{t("Login করুন")}</Link></>}
+          {mode === "login" ? <>{t("Account নেই?")} <Link href="/register" style={{ color: "var(--accent)", fontWeight: 600 }}>{t("নতুন খুলুন")}</Link></> : <>{t("Account আছে?")} <Link href="/login" style={{ color: "var(--accent)", fontWeight: 600 }}>{t("Login করুন")}</Link></>}
         </p>
         <p className="muted" style={{ textAlign: "center", fontSize: 12.5 }}><Link href="/privacy">{t("Privacy Policy")}</Link> · <Link href="/delete-account">{t("Account মুছে ফেলা")}</Link></p>
       </form>

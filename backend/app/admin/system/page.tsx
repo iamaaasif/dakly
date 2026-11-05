@@ -56,7 +56,7 @@ export default async function System({ searchParams }: { searchParams: Promise<{
         <div className="sec-h"><h3>Error log</h3><form action={clearErrors}><button className="btn ghost sm">১ ঘণ্টার পুরোনো মুছুন</button></form></div>
         <div className="chips"><Link className={`chip ${!src ? "on" : ""}`} href="/admin/system">সব</Link>{bySource.map((b) => <Link key={b.source} className={`chip ${src === b.source ? "on" : ""}`} href={`/admin/system?src=${b.source}`}>{b.source} · {bn(b._count._all)}</Link>)}</div>
         <div className="tbl-wrap"><table className="tbl"><thead><tr><th>সময়</th><th>উৎস</th><th>দোকান</th><th>Error</th></tr></thead>
-          <tbody>{errors.map((e) => <tr key={e.id}><td className="num">{dateTimeBn(e.createdAt)}</td><td>{e.source}</td><td>{e.shopId ? <Link href={`/admin/merchants/${e.shopId}`} style={{ color: "var(--dak)" }}>দেখুন</Link> : "—"}</td><td style={{ whiteSpace: "normal", minWidth: 260 }}>{e.message}</td></tr>)}</tbody></table></div>
+          <tbody>{errors.map((e) => <tr key={e.id}><td className="num">{dateTimeBn(e.createdAt)}</td><td>{e.source}</td><td>{e.shopId ? <Link href={`/admin/merchants/${e.shopId}`} style={{ color: "var(--accent)" }}>দেখুন</Link> : "—"}</td><td style={{ whiteSpace: "normal", minWidth: 260 }}>{e.message}</td></tr>)}</tbody></table></div>
         {!errors.length && <p className="muted">কোনো Error নেই।</p>}
       </div>
     </>

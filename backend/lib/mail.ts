@@ -22,9 +22,9 @@ const esc = (s: string) => s.replace(/[<>&"]/g, (c) => ({ "<": "&lt;", ">": "&gt
 function html(text: string) {
   const body = esc(text).split("\n").map((l) => {
     const u = l.trim().match(/^(https?:\/\/\S+)$/);
-    return u ? `<p><a href="${u[1]}" style="display:inline-block;background:#c8402a;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:600">${u[1].length > 60 ? "Open" : u[1]}</a></p>` : l ? `<p style="margin:0 0 10px">${l.replace(/(https?:\/\/\S+)/g, '<a href="$1">$1</a>')}</p>` : "";
+    return u ? `<p><a href="${u[1]}" style="display:inline-block;background:#d6ef67;color:#070707;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:600">${u[1].length > 60 ? "Open" : u[1]}</a></p>` : l ? `<p style="margin:0 0 10px">${l.replace(/(https?:\/\/\S+)/g, '<a href="$1">$1</a>')}</p>` : "";
   }).join("");
-  return `<!doctype html><meta charset="utf-8"><div style="font-family:system-ui,-apple-system,'Noto Sans Bengali',sans-serif;background:#f3f5f2;padding:24px"><div style="max-width:560px;margin:auto;background:#fff;border:1px solid #d5dcd4;border-radius:14px;padding:24px;color:#13261d;font-size:15px;line-height:1.55"><div style="font-weight:800;font-size:20px;color:#c8402a;margin-bottom:14px">Dakly</div>${body}<hr style="border:0;border-top:1px solid #e3e8e2;margin:18px 0"><p style="color:#5b6b62;font-size:12.5px;margin:0">Dakly · ${esc(appUrl())} · ${esc(supportEmail())}</p></div></div>`;
+  return `<!doctype html><meta charset="utf-8"><div style="font-family:system-ui,-apple-system,'Noto Sans Bengali',sans-serif;background:#f9faf8;padding:24px"><div style="max-width:560px;margin:auto;background:#fff;border:1px solid #e1e5dc;border-radius:14px;padding:24px;color:#070707;font-size:15px;line-height:1.55"><div style="font-weight:800;font-size:20px;color:#347421;margin-bottom:14px">Dakly</div>${body}<hr style="border:0;border-top:1px solid #e3e8e2;margin:18px 0"><p style="color:#5b6b62;font-size:12.5px;margin:0">Dakly · ${esc(appUrl())} · ${esc(supportEmail())}</p></div></div>`;
 }
 
 /**

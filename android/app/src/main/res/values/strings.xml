@@ -25,6 +25,8 @@
     <string name="sort_name">Name</string>
     <string name="offline_title">No internet connection</string>
     <string name="offline_body">Check that mobile data or Wi-Fi is on, then try again.</string>
+    <string name="server_unreachable_title">Can\'t reach Dakly</string>
+    <string name="server_unreachable_body">Your internet is working, but the Dakly server (%1$s) is not answering. Please try again in a few minutes.</string>
     <string name="error_title">Something went wrong</string>
     <string name="error_body">Please try again in a moment.</string>
     <string name="err_invalid_phone">Enter a valid mobile number</string>

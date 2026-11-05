@@ -13,16 +13,28 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import bd.com.dakly.app.R
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
-/** Dakly brand colours, same tokens as the web app. */
+/** Dakly colours, aligned with wowapps.io: lime #D6EF67, ink #070707, forest #347421. Same tokens as the web app. */
 @Immutable
 data class DaklyColors(
     val paper: Color, val surface: Color, val sunk: Color, val line: Color,
     val ink: Color, val ink2: Color, val ink3: Color,
-    val dak: Color, val dakSoft: Color, val dakInk: Color,
+    /** Brand lime: fills only (buttons, selected tab, badges). Never use as text on [paper]. */
+    val dak: Color, val dakSoft: Color, val dakInk: Color, val dakEdge: Color,
+    /** Readable brand green for text, links, icons and selected borders. */
+    val accent: Color, val accentSoft: Color,
+    /** Errors and destructive actions. */
+    val bad: Color, val badSoft: Color,
     val haldi: Color, val haldiSoft: Color,
     val leaf: Color, val leafSoft: Color,
     val sky: Color, val skySoft: Color,
@@ -30,23 +42,27 @@ data class DaklyColors(
 )
 
 val LightDakly = DaklyColors(
-    paper = Color(0xFFF3F5F2), surface = Color(0xFFFFFFFF), sunk = Color(0xFFE8ECE7), line = Color(0xFFD5DCD4),
-    ink = Color(0xFF13261D), ink2 = Color(0xFF4B5D53), ink3 = Color(0xFF6F8076),
-    dak = Color(0xFFC8402A), dakSoft = Color(0xFFF8E3DD), dakInk = Color(0xFFFFFFFF),
-    haldi = Color(0xFFB07812), haldiSoft = Color(0xFFF7ECD4),
-    leaf = Color(0xFF1F7A52), leafSoft = Color(0xFFDCEFE4),
-    sky = Color(0xFF2F6690), skySoft = Color(0xFFDDE9F2),
-    hero = Color(0xFF13261D), heroFg = Color(0xFFEEF3EE), hero2 = Color(0xFFA9BDB0),
+    paper = Color(0xFFF9FAF8), surface = Color(0xFFFFFFFF), sunk = Color(0xFFEFF2EC), line = Color(0xFFE1E5DC),
+    ink = Color(0xFF070707), ink2 = Color(0xFF2E2E2E), ink3 = Color(0xFF66695F),
+    dak = Color(0xFFD6EF67), dakSoft = Color(0xFFEFF9E6), dakInk = Color(0xFF070707), dakEdge = Color(0xFFB6CE4E),
+    accent = Color(0xFF347421), accentSoft = Color(0xFFEFF9E6),
+    bad = Color(0xFFC4372B), badSoft = Color(0xFFFDECEA),
+    haldi = Color(0xFF8A5A00), haldiSoft = Color(0xFFFFF6DC),
+    leaf = Color(0xFF347421), leafSoft = Color(0xFFE3F3D3),
+    sky = Color(0xFF2F6690), skySoft = Color(0xFFE6EFF6),
+    hero = Color(0xFF070707), heroFg = Color(0xFFFDFDFD), hero2 = Color(0xFFA6B198),
 )
 
 val DarkDakly = DaklyColors(
-    paper = Color(0xFF0F1713), surface = Color(0xFF16211B), sunk = Color(0xFF1D2A23), line = Color(0xFF2B3A32),
-    ink = Color(0xFFE6EEE8), ink2 = Color(0xFFA8B8AE), ink3 = Color(0xFF8B9C91),
-    dak = Color(0xFFE8664E), dakSoft = Color(0xFF3A1F19), dakInk = Color(0xFF1A0D09),
-    haldi = Color(0xFFE6B04F), haldiSoft = Color(0xFF33291A),
-    leaf = Color(0xFF4CBF8A), leafSoft = Color(0xFF173328),
-    sky = Color(0xFF6FA6D4), skySoft = Color(0xFF18293A),
-    hero = Color(0xFF1F3A2C), heroFg = Color(0xFFEEF3EE), hero2 = Color(0xFFA9C2B3),
+    paper = Color(0xFF070707), surface = Color(0xFF121212), sunk = Color(0xFF1C1C1C), line = Color(0xFF2E2E2E),
+    ink = Color(0xFFFDFDFD), ink2 = Color(0xFFD2D2D2), ink3 = Color(0xFF9A9D94),
+    dak = Color(0xFFD6EF67), dakSoft = Color(0xFF222B10), dakInk = Color(0xFF070707), dakEdge = Color(0xFFB6CE4E),
+    accent = Color(0xFFD6EF67), accentSoft = Color(0xFF222B10),
+    bad = Color(0xFFFF8D9B), badSoft = Color(0xFF331519),
+    haldi = Color(0xFFFFB800), haldiSoft = Color(0xFF2B2208),
+    leaf = Color(0xFF9BD878), leafSoft = Color(0xFF18260F),
+    sky = Color(0xFF7DB0DA), skySoft = Color(0xFF15222E),
+    hero = Color(0xFF141C0D), heroFg = Color(0xFFFDFDFD), hero2 = Color(0xFFA6B198),
 )
 
 val LocalDakly = staticCompositionLocalOf { LightDakly }
@@ -54,19 +70,44 @@ val LocalDakly = staticCompositionLocalOf { LightDakly }
 private fun scheme(c: DaklyColors, dark: Boolean): ColorScheme {
     val base = if (dark) darkColorScheme() else lightColorScheme()
     return base.copy(
-        primary = c.dak, onPrimary = c.dakInk, primaryContainer = c.dakSoft, onPrimaryContainer = c.dak,
-        secondary = c.leaf, onSecondary = c.surface, secondaryContainer = c.leafSoft, onSecondaryContainer = c.leaf,
+        primary = c.dak, onPrimary = c.dakInk, primaryContainer = c.dakSoft, onPrimaryContainer = c.accent,
+        secondary = c.accent, onSecondary = c.surface, secondaryContainer = c.leafSoft, onSecondaryContainer = c.leaf,
         tertiary = c.sky, tertiaryContainer = c.skySoft,
         background = c.paper, onBackground = c.ink,
         surface = c.surface, onSurface = c.ink, surfaceVariant = c.sunk, onSurfaceVariant = c.ink2,
         surfaceContainerLowest = c.surface, surfaceContainerLow = c.surface, surfaceContainer = c.surface,
         surfaceContainerHigh = c.surface, surfaceContainerHighest = c.sunk,
         outline = c.line, outlineVariant = c.line,
-        error = c.dak, onError = c.dakInk, errorContainer = c.dakSoft, onErrorContainer = c.dak,
+        error = c.bad, onError = c.surface, errorContainer = c.badSoft, onErrorContainer = c.bad,
     )
 }
 
-private val DaklyType = Typography().let { t ->
+/**
+ * Inter (same family as wowapps.io), bundled as a variable font. Weight axes apply on Android 8+;
+ * older phones draw every weight as Regular. Bengali glyphs fall back to the system Bengali font.
+ */
+@OptIn(ExperimentalTextApi::class)
+val Inter = FontFamily(
+    listOf(400, 500, 600, 700, 800).map { w ->
+        Font(R.font.inter, FontWeight(w), variationSettings = FontVariation.Settings(FontVariation.weight(w)))
+    },
+)
+
+private val DaklyType = Typography().let { m3 ->
+    // Material's letter-spacing (0.1-0.5sp) is tuned for Roboto; Inter reads best tight, as on wowapps.io.
+    fun TextStyle.inter(tracking: TextUnit = 0.sp) = copy(fontFamily = Inter, letterSpacing = tracking)
+    val base = m3
+    val tight = (-0.02).em
+    val t = base.copy(
+        displayLarge = base.displayLarge.inter(tight), displayMedium = base.displayMedium.inter(tight),
+        displaySmall = base.displaySmall.inter(tight), headlineLarge = base.headlineLarge.inter(tight),
+        headlineMedium = base.headlineMedium.inter(tight), headlineSmall = base.headlineSmall.inter(tight),
+        titleLarge = base.titleLarge.inter((-0.01).em), titleMedium = base.titleMedium.inter(),
+        titleSmall = base.titleSmall.inter(), bodyLarge = base.bodyLarge.inter(),
+        bodyMedium = base.bodyMedium.inter(), bodySmall = base.bodySmall.inter(),
+        labelLarge = base.labelLarge.inter(), labelMedium = base.labelMedium.inter(),
+        labelSmall = base.labelSmall.inter(),
+    )
     t.copy(
         headlineLarge = t.headlineLarge.copy(fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, lineHeight = 34.sp),
         headlineMedium = t.headlineMedium.copy(fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, lineHeight = 30.sp),

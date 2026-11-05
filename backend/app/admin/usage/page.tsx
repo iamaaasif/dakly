@@ -26,7 +26,7 @@ export default async function Usage() {
         <thead><tr><th>দোকান</th><th>Plan</th><th>WA</th><th>SMS</th><th>Call</th><th>AI</th><th>খরচ</th><th>Plan মূল্য</th><th>লাভ/ক্ষতি</th></tr></thead>
         <tbody>{rows.filter((r) => r.cost || r.paid).map((r) => {
           const margin = PLANS[r.plan].price - r.cost;
-          return <tr key={r.shop.id}><td><Link href={`/admin/merchants/${r.shop.id}`} style={{ color: "var(--dak)" }}>{r.shop.name}</Link></td><td>{PLANS[r.plan].name}</td><td>{bn(r.wa)}</td><td>{bn(r.sms)}</td><td>{bn(r.voice)}</td><td>{bn(r.ai)}</td><td>{tk(r.cost)}</td><td>{tk(PLANS[r.plan].price)}</td><td style={{ color: margin >= 0 ? "var(--leaf)" : "var(--dak)", fontWeight: 700 }}>{tk(margin)}</td></tr>;
+          return <tr key={r.shop.id}><td><Link href={`/admin/merchants/${r.shop.id}`} style={{ color: "var(--accent)" }}>{r.shop.name}</Link></td><td>{PLANS[r.plan].name}</td><td>{bn(r.wa)}</td><td>{bn(r.sms)}</td><td>{bn(r.voice)}</td><td>{bn(r.ai)}</td><td>{tk(r.cost)}</td><td>{tk(PLANS[r.plan].price)}</td><td style={{ color: margin >= 0 ? "var(--leaf)" : "var(--bad)", fontWeight: 700 }}>{tk(margin)}</td></tr>;
         })}</tbody>
       </table></div>
     </>
