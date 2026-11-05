@@ -72,9 +72,9 @@ export default async function Settings({ searchParams }: { searchParams: Promise
         <PasswordForm />
       </div>
       <form action={logout}><button className="btn ghost">Logout</button></form>
-      <div className="card form" style={{ maxWidth: 720, borderColor: "var(--dak)" }} id="delete">
-        <h3 style={{ fontSize: 17, color: "var(--dak)" }}>{t("Account মুছে ফেলুন")}</h3>
-        <p className="muted">{t("আপনার দোকান, সব Customer, Order, Campaign, Message, Post আর AI Knowledge চিরতরে মুছে যাবে। এটা আর ফেরানো যাবে না।")} <Link href="/privacy" style={{ color: "var(--dak)" }}>{t("Privacy Policy")}</Link></p>
+      <div className="card form" style={{ maxWidth: 720, borderColor: "var(--bad)" }} id="delete">
+        <h3 style={{ fontSize: 17, color: "var(--bad)" }}>{t("Account মুছে ফেলুন")}</h3>
+        <p className="muted">{t("আপনার দোকান, সব Customer, Order, Campaign, Message, Post আর AI Knowledge চিরতরে মুছে যাবে। এটা আর ফেরানো যাবে না।")} <Link href="/privacy" style={{ color: "var(--accent)" }}>{t("Privacy Policy")}</Link></p>
         <DeleteAccountForm />
       </div>
     </>

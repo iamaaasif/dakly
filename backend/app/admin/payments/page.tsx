@@ -20,7 +20,7 @@ export default async function Payments({ searchParams }: { searchParams: Promise
       <div className="tbl-wrap"><table className="tbl num">
         <thead><tr><th>তারিখ</th><th>দোকান</th><th>Plan</th><th>টাকা</th><th>অবস্থা</th><th>Method</th><th>Transaction</th><th>নোট</th></tr></thead>
         <tbody>{list.map((p) => (
-          <tr key={p.id}><td>{dateTimeBn(p.createdAt)}</td><td><Link href={`/admin/merchants/${p.shopId}`} style={{ color: "var(--dak)" }}>{p.shop.name}</Link></td><td>{p.plan} × {bn(p.months)}</td><td>{p.currency === "BDT" ? tk(p.amount) : `${p.amount} ${p.currency}`}</td>
+          <tr key={p.id}><td>{dateTimeBn(p.createdAt)}</td><td><Link href={`/admin/merchants/${p.shopId}`} style={{ color: "var(--accent)" }}>{p.shop.name}</Link></td><td>{p.plan} × {bn(p.months)}</td><td>{p.currency === "BDT" ? tk(p.amount) : `${p.amount} ${p.currency}`}</td>
             <td><span className={`pill ${p.status === "paid" || p.status === "manual" ? "ok" : p.status === "pending" ? "warn" : "bad"}`}>{p.status}</span></td><td>{p.method ?? "—"}</td><td>{p.tranId}</td><td>{p.note ?? ""}</td></tr>
         ))}</tbody>
       </table></div>

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -65,7 +66,7 @@ fun errorText(e: Throwable): String = when (e) {
 fun <T> LoadContent(state: Load<T>, onRetry: () -> Unit, content: @Composable (T) -> Unit) {
     when (state) {
         is Load.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            CircularProgressIndicator(color = Dakly.colors.accent)
         }
         is Load.Failed -> ErrorState(state.error, onRetry)
         is Load.Ready -> content(state.data)
@@ -99,8 +100,8 @@ fun EmptyState(icon: ImageVector, title: String, body: String? = null, action: S
         Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(Modifier.size(64.dp).clip(CircleShape).background(Dakly.colors.sunk), contentAlignment = Alignment.Center) {
-            Icon(icon, null, tint = Dakly.colors.ink3, modifier = Modifier.size(30.dp))
+        Box(Modifier.size(64.dp).clip(CircleShape).background(Dakly.colors.dakSoft), contentAlignment = Alignment.Center) {
+            Icon(icon, null, tint = Dakly.colors.accent, modifier = Modifier.size(30.dp))
         }
         Spacer(Modifier.height(14.dp))
         Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
@@ -127,10 +128,14 @@ fun PrimaryButton(
     Button(
         onClick = onClick,
         enabled = enabled && !loading,
-        modifier = modifier.height(50.dp),
-        shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors(containerColor = Dakly.colors.dak, contentColor = Dakly.colors.dakInk),
-        contentPadding = PaddingValues(horizontal = 20.dp),
+        modifier = modifier.heightIn(min = 50.dp),
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Dakly.colors.dak, contentColor = Dakly.colors.dakInk,
+            disabledContainerColor = Dakly.colors.sunk, disabledContentColor = Dakly.colors.ink3,
+        ),
+        border = if (enabled && !loading) androidx.compose.foundation.BorderStroke(1.dp, Dakly.colors.dakEdge) else null,
+        contentPadding = PaddingValues(horizontal = 22.dp),
     ) {
         if (loading) {
             CircularProgressIndicator(Modifier.size(20.dp), color = Dakly.colors.dakInk, strokeWidth = 2.dp)
@@ -147,8 +152,9 @@ fun PrimaryButton(
 @Composable
 fun SecondaryButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = true, icon: ImageVector? = null, onClick: () -> Unit) {
     OutlinedButton(
-        onClick = onClick, enabled = enabled, modifier = modifier.height(50.dp), shape = MaterialTheme.shapes.medium,
-        contentPadding = PaddingValues(horizontal = 18.dp),
+        onClick = onClick, enabled = enabled, modifier = modifier.heightIn(min = 50.dp), shape = CircleShape,
+        border = androidx.compose.foundation.BorderStroke(1.dp, Dakly.colors.line),
+        contentPadding = PaddingValues(horizontal = 20.dp),
     ) {
         if (icon != null) {
             Icon(icon, null, Modifier.size(18.dp), tint = Dakly.colors.ink)
@@ -181,15 +187,15 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier, action: String? = 
         Text(text, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
         if (action != null) {
             Text(
-                action, color = Dakly.colors.dak, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
-                modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onAction).padding(6.dp),
+                action, color = Dakly.colors.accent, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+                modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onAction).padding(horizontal = 8.dp, vertical = 10.dp),
             )
         }
     }
 }
 
 @Composable
-fun Avatar(name: String?, size: Dp = 40.dp, bg: Color = Dakly.colors.sunk, fg: Color = Dakly.colors.ink2) {
+fun Avatar(name: String?, size: Dp = 40.dp, bg: Color = Dakly.colors.dakSoft, fg: Color = Dakly.colors.accent) {
     Box(Modifier.size(size).clip(CircleShape).background(bg), contentAlignment = Alignment.Center) {
         Text(Format.initial(name), color = fg, fontWeight = FontWeight.Bold, fontSize = (size.value * 0.4f).sp)
     }
@@ -220,13 +226,13 @@ fun UsageBar(used: Int, limit: Int, modifier: Modifier = Modifier) {
     LinearProgressIndicator(
         progress = { f },
         modifier = modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
-        color = if (f > 0.9f) Dakly.colors.dak else Dakly.colors.leaf,
+        color = if (f > 0.9f) Dakly.colors.bad else Dakly.colors.leaf,
         trackColor = Dakly.colors.sunk,
     )
 }
 
 @Composable
-fun Banner(text: String, fg: Color = Dakly.colors.dak, bg: Color = Dakly.colors.dakSoft, action: String? = null, modifier: Modifier = Modifier, onAction: () -> Unit = {}) {
+fun Banner(text: String, fg: Color = Dakly.colors.bad, bg: Color = Dakly.colors.badSoft, action: String? = null, modifier: Modifier = Modifier, onAction: () -> Unit = {}) {
     Column(
         modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(bg).padding(14.dp),
     ) {
@@ -331,7 +337,7 @@ fun Field(
         colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Dakly.colors.ink, unfocusedBorderColor = Dakly.colors.line,
             focusedLabelColor = Dakly.colors.ink, focusedContainerColor = Dakly.colors.surface, unfocusedContainerColor = Dakly.colors.surface,
-            cursorColor = Dakly.colors.dak,
+            cursorColor = Dakly.colors.accent,
         ),
     )
 }
@@ -347,11 +353,11 @@ fun <T> ChoiceChips(options: List<T>, selected: T?, label: @Composable (T) -> St
                 selected = on, onClick = { onSelect(o) }, label = { Text(label(o)) },
                 shape = RoundedCornerShape(50),
                 colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = Dakly.colors.ink, selectedLabelColor = Dakly.colors.paper,
+                    selectedContainerColor = Dakly.colors.dak, selectedLabelColor = Dakly.colors.dakInk,
                     containerColor = Dakly.colors.surface, labelColor = Dakly.colors.ink2,
                 ),
                 border = androidx.compose.material3.FilterChipDefaults.filterChipBorder(
-                    enabled = true, selected = on, borderColor = Dakly.colors.line, selectedBorderColor = Dakly.colors.ink,
+                    enabled = true, selected = on, borderColor = Dakly.colors.line, selectedBorderColor = Dakly.colors.dakEdge,
                 ),
             )
         }
@@ -366,7 +372,7 @@ fun ConfirmDialog(title: String, body: String, confirm: String, destructive: Boo
         text = { Text(body) },
         confirmButton = {
             androidx.compose.material3.TextButton(onClick = { onDismiss(); onConfirm() }) {
-                Text(confirm, color = if (destructive) Dakly.colors.dak else Dakly.colors.ink, fontWeight = FontWeight.Bold)
+                Text(confirm, color = if (destructive) Dakly.colors.bad else Dakly.colors.ink, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = Dakly.colors.ink2) } },
@@ -378,7 +384,7 @@ fun ConfirmDialog(title: String, body: String, confirm: String, destructive: Boo
 @Composable
 fun segmentColors(key: String?): Pair<Color, Color> = when (key) {
     "vip" -> Dakly.colors.haldi to Dakly.colors.haldiSoft
-    "inactive" -> Dakly.colors.dak to Dakly.colors.dakSoft
+    "inactive" -> Dakly.colors.bad to Dakly.colors.badSoft
     "new" -> Dakly.colors.sky to Dakly.colors.skySoft
     else -> Dakly.colors.leaf to Dakly.colors.leafSoft
 }
@@ -386,7 +392,7 @@ fun segmentColors(key: String?): Pair<Color, Color> = when (key) {
 @Composable
 fun statusColors(status: String?): Pair<Color, Color> = when (status) {
     "read", "interested", "published", "sent", "delivered" -> Dakly.colors.leaf to Dakly.colors.leafSoft
-    "failed" -> Dakly.colors.dak to Dakly.colors.dakSoft
+    "failed" -> Dakly.colors.bad to Dakly.colors.badSoft
     "scheduled", "queuing", "queued", "sending" -> Dakly.colors.sky to Dakly.colors.skySoft
     "test", "skipped" -> Dakly.colors.haldi to Dakly.colors.haldiSoft
     else -> Dakly.colors.ink2 to Dakly.colors.sunk

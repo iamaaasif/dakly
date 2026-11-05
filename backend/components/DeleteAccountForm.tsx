@@ -14,7 +14,7 @@ export function DeleteAccountForm() {
       <label className="field">Password<input id="del-password" name="password" type="password" required autoComplete="current-password" /></label>
       <label className="field">{t("নিশ্চিত করতে DELETE লিখুন")}<input id="del-confirm" name="confirm" required autoComplete="off" /></label>
       <div className="row-btns">
-        <button className="btn primary" style={{ background: "var(--dak)" }} disabled={pending}>{pending ? t("মুছছি…") : t("চিরতরে মুছে ফেলুন")}</button>
+        <button className="btn primary" style={{ background: "var(--bad)", color: "#fff" }} disabled={pending}>{pending ? t("মুছছি…") : t("চিরতরে মুছে ফেলুন")}</button>
         <button type="button" className="btn ghost" onClick={() => setOpen(false)}>{t("বাতিল")}</button>
       </div>
     </form>

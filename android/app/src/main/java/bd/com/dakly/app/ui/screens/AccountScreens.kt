@@ -160,7 +160,7 @@ private fun TipCard(t: Tip, onAct: () -> Unit) {
                 Text(t.title, fontWeight = FontWeight.SemiBold)
                 Text(t.body, color = Dakly.colors.ink2, fontSize = 13.5.sp)
                 t.why?.takeIf { it.isNotBlank() }?.let { Text(it, color = Dakly.colors.ink3, fontSize = 12.sp, modifier = Modifier.padding(top = 2.dp)) }
-                Text(stringResource(R.string.home_create_campaign), color = Dakly.colors.dak, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
+                Text(stringResource(R.string.home_create_campaign), color = Dakly.colors.accent, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
             }
         }
     }
@@ -169,7 +169,7 @@ private fun TipCard(t: Tip, onAct: () -> Unit) {
 @Composable
 private fun NoticeCard(n: Notice, onAction: () -> Unit, onDismiss: () -> Unit) {
     val (fg, bg) = when (n.tone) {
-        "warn", "warning", "danger" -> Dakly.colors.dak to Dakly.colors.dakSoft
+        "warn", "warning", "danger" -> Dakly.colors.bad to Dakly.colors.badSoft
         "good", "success" -> Dakly.colors.leaf to Dakly.colors.leafSoft
         "tip" -> Dakly.colors.haldi to Dakly.colors.haldiSoft
         else -> Dakly.colors.sky to Dakly.colors.skySoft
@@ -193,6 +193,7 @@ private fun NoticeCard(n: Notice, onAction: () -> Unit, onDismiss: () -> Unit) {
                     n.action?.let { a ->
                         androidx.compose.material3.Button(
                             onClick = onAction,
+                            shape = androidx.compose.foundation.shape.CircleShape,
                             colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Dakly.colors.dak, contentColor = Dakly.colors.dakInk),
                         ) { Text(a.label, fontSize = 13.sp) }
                     }
@@ -218,7 +219,7 @@ fun MoreScreen(nav: NavHostController, onLoggedOut: () -> Unit) {
             item {
                 DCard(onClick = { nav.navigate(Routes.SETTINGS) }) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Avatar(me?.shop?.name, 48.dp, Dakly.colors.haldiSoft, Dakly.colors.haldi)
+                        Avatar(me?.shop?.name, 48.dp, Dakly.colors.dak, Dakly.colors.dakInk)
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
                             Text(me?.shop?.name.orEmpty(), style = MaterialTheme.typography.titleMedium)
@@ -429,7 +430,7 @@ private fun FacebookCard(state: bd.com.dakly.app.data.FacebookState?, onChanged:
                             scope.launch { try { repo.choosePage(id); onChanged() } catch (e: Exception) { ctx.toastError(e) } }
                         })
                     }
-                    TextButton(onClick = { confirm = true }) { Text(stringResource(R.string.disconnect), color = Dakly.colors.dak) }
+                    TextButton(onClick = { confirm = true }) { Text(stringResource(R.string.disconnect), color = Dakly.colors.bad) }
                 }
                 else -> {
                     Text(stringResource(R.string.settings_fb_body), color = Dakly.colors.ink2, fontSize = 13.sp)
@@ -472,14 +473,14 @@ private fun StoreCard(s: Settings, onChanged: () -> Unit) {
             if (s.store.type != null) {
                 Text((if (s.store.type == "shopify") "Shopify" else "WooCommerce") + " · " + s.store.url.orEmpty(), color = Dakly.colors.ink2)
                 s.store.syncedAt?.let { Text(stringResource(R.string.settings_store_synced, Format.relative(it)), color = Dakly.colors.ink3, fontSize = 12.5.sp) }
-                s.store.error?.let { Text(it, color = Dakly.colors.dak, fontSize = 12.5.sp) }
+                s.store.error?.let { Text(it, color = Dakly.colors.bad, fontSize = 12.5.sp) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SecondaryButton(stringResource(R.string.settings_sync_now), Modifier.weight(1f), enabled = !busy) {
                         busy = true
                         scope.launch { try { ctx.toast(repo.syncStore().message ?: ctx.getString(R.string.done)); onChanged() } catch (e: Exception) { ctx.toastError(e) } finally { busy = false } }
                     }
                     TextButton(onClick = { scope.launch { try { repo.disconnectStore(); onChanged() } catch (e: Exception) { ctx.toastError(e) } } }) {
-                        Text(stringResource(R.string.disconnect), color = Dakly.colors.dak)
+                        Text(stringResource(R.string.disconnect), color = Dakly.colors.bad)
                     }
                 }
             } else {
@@ -562,7 +563,7 @@ private fun ChannelsCard(s: Settings, onChanged: () -> Unit) {
                     scope.launch {
                         try { repo.patchSettings(repo.fields("clearChannels" to true)); ctx.toast(ctx.getString(R.string.saved)); open = false; onChanged() } catch (e: Exception) { ctx.toastError(e) }
                     }
-                }) { Text(stringResource(R.string.settings_channels_clear), color = Dakly.colors.dak) }
+                }) { Text(stringResource(R.string.settings_channels_clear), color = Dakly.colors.bad) }
             }
         }
     }
@@ -592,9 +593,9 @@ private fun DeleteAccountCard(onDeleted: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     DCard {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.delete_account), style = MaterialTheme.typography.titleMedium, color = Dakly.colors.dak)
+            Text(stringResource(R.string.delete_account), style = MaterialTheme.typography.titleMedium, color = Dakly.colors.bad)
             Text(stringResource(R.string.delete_account_body), color = Dakly.colors.ink2, fontSize = 13.sp)
-            TextButton(onClick = { open = true }) { Text(stringResource(R.string.delete_account), color = Dakly.colors.dak, fontWeight = FontWeight.Bold) }
+            TextButton(onClick = { open = true }) { Text(stringResource(R.string.delete_account), color = Dakly.colors.bad, fontWeight = FontWeight.Bold) }
         }
     }
     if (open) {
@@ -614,7 +615,7 @@ private fun DeleteAccountCard(onDeleted: () -> Unit) {
                     scope.launch {
                         try { repo.deleteAccount(password); open = false; onDeleted() } catch (e: Exception) { ctx.toastError(e) } finally { busy = false }
                     }
-                }) { Text(stringResource(R.string.delete), color = Dakly.colors.dak, fontWeight = FontWeight.Bold) }
+                }) { Text(stringResource(R.string.delete), color = Dakly.colors.bad, fontWeight = FontWeight.Bold) }
             },
             dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
         )
@@ -663,7 +664,7 @@ fun BillingScreen(nav: NavHostController) {
                                 Text(
                                     if (p.price.amount == 0L) stringResource(R.string.billing_free)
                                     else stringResource(R.string.billing_per_month, Format.money(ctx, p.price.amount.toDouble(), p.price.currency)),
-                                    style = MaterialTheme.typography.headlineSmall, color = Dakly.colors.dak,
+                                    style = MaterialTheme.typography.headlineSmall, color = Dakly.colors.accent,
                                 )
                                 Text(stringResource(R.string.billing_limits, Format.number(ctx, p.messages), Format.number(ctx, p.ai)), color = Dakly.colors.ink2, fontSize = 13.sp)
                                 p.features.forEach { Text("• $it", color = Dakly.colors.ink2, fontSize = 13.sp) }

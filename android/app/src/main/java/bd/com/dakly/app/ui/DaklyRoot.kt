@@ -2,6 +2,20 @@ package bd.com.dakly.app.ui
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -101,7 +115,7 @@ fun DaklyRoot(pendingPath: String?, onPathHandled: () -> Unit) {
 
     when (gate) {
         Gate.Checking -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Dakly.colors.dak)
+            CircularProgressIndicator(color = Dakly.colors.accent)
         }
         Gate.LoggedOut -> AuthScreen(onSignedIn = { scope.launch { gate = Gate.Checking; check() } })
         Gate.Blocked -> ShopStatusScreen(
@@ -205,35 +219,69 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
         }
     }
 
+    // Phones: bottom bar. Tablets and landscape (>= 600dp wide): side rail, and content capped at a readable width.
+    val wide = LocalConfiguration.current.screenWidthDp >= 600
+    val tabColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = Dakly.colors.dakInk, selectedTextColor = Dakly.colors.ink,
+        indicatorColor = Dakly.colors.dak,
+        unselectedIconColor = Dakly.colors.ink3, unselectedTextColor = Dakly.colors.ink3,
+    )
+    val tabIcon: @Composable (Tab) -> Unit = { t ->
+        if (t.route == Routes.INBOX && unread > 0) {
+            BadgedBox(badge = { Badge(containerColor = Dakly.colors.dak, contentColor = Dakly.colors.dakInk) { Text(if (unread > 99) "99+" else "$unread") } }) {
+                Icon(t.icon, null)
+            }
+        } else Icon(t.icon, null)
+    }
+
     Scaffold(
         containerColor = Dakly.colors.paper,
         bottomBar = {
-            if (showBar) {
+            if (showBar && !wide) {
                 NavigationBar(containerColor = Dakly.colors.surface, tonalElevation = 0.dp) {
                     tabs.forEach { t ->
                         NavigationBarItem(
                             selected = current == t.route,
                             onClick = { nav.openTab(t.route) },
-                            icon = {
-                                if (t.route == Routes.INBOX && unread > 0) {
-                                    BadgedBox(badge = { Badge(containerColor = Dakly.colors.dak) { Text(if (unread > 99) "99+" else "$unread") } }) {
-                                        Icon(t.icon, null)
-                                    }
-                                } else Icon(t.icon, null)
-                            },
+                            icon = { tabIcon(t) },
                             label = { Text(stringResource(t.label), maxLines = 1) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Dakly.colors.dak, selectedTextColor = Dakly.colors.dak,
-                                indicatorColor = Dakly.colors.dakSoft,
-                                unselectedIconColor = Dakly.colors.ink3, unselectedTextColor = Dakly.colors.ink3,
-                            ),
+                            colors = tabColors,
                         )
                     }
                 }
             }
         },
     ) { pad ->
-        NavHost(nav, startDestination = Routes.HOME, modifier = Modifier.padding(bottom = pad.calculateBottomPadding()).consumeWindowInsets(pad)) {
+        Row(Modifier.fillMaxSize().padding(bottom = pad.calculateBottomPadding()).consumeWindowInsets(pad)) {
+            if (showBar && wide) {
+                NavigationRail(containerColor = Dakly.colors.surface) {
+                    Spacer(Modifier.weight(1f))
+                    tabs.forEach { t ->
+                        NavigationRailItem(
+                            selected = current == t.route,
+                            onClick = { nav.openTab(t.route) },
+                            icon = { tabIcon(t) },
+                            label = { Text(stringResource(t.label), maxLines = 1) },
+                            colors = NavigationRailItemDefaults.colors(
+                                selectedIconColor = Dakly.colors.dakInk, selectedTextColor = Dakly.colors.ink,
+                                indicatorColor = Dakly.colors.dak,
+                                unselectedIconColor = Dakly.colors.ink3, unselectedTextColor = Dakly.colors.ink3,
+                            ),
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
+                }
+            }
+            Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.TopCenter) {
+        NavHost(
+            nav, startDestination = Routes.HOME,
+            modifier = Modifier.widthIn(max = 840.dp).fillMaxSize(),
+            // Short fades between tabs, a small slide for drill-down screens: smooth without feeling slow.
+            enterTransition = { fadeIn(tween(200)) + slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { it / 14 } },
+            exitTransition = { fadeOut(tween(120)) },
+            popEnterTransition = { fadeIn(tween(200)) },
+            popExitTransition = { fadeOut(tween(140)) + slideOutHorizontally(tween(220, easing = FastOutSlowInEasing)) { it / 14 } },
+        ) {
             composable(Routes.HOME) { HomeScreen(nav) }
             composable(Routes.CUSTOMERS) { CustomersScreen(nav) }
             composable(Routes.INBOX) { InboxScreen(nav, onUnread = { unread = it }) }
@@ -280,6 +328,8 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
             composable(Routes.SETTINGS) { SettingsScreen(nav, onLoggedOut) }
             composable(Routes.BILLING) { BillingScreen(nav) }
             composable(Routes.SUPPORT) { SupportScreen(nav) }
+        }
+            }
         }
     }
 }

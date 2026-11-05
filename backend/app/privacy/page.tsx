@@ -105,12 +105,12 @@ export default async function Privacy() {
         {c.s.map(([h, items]) => (
           <section key={h} style={{ marginTop: 20 }}>
             <h2 style={{ fontSize: 19 }}>{h}</h2>
-            <ul style={{ paddingLeft: 20, display: "grid", gap: 6, marginTop: 6 }}>{items.map((i) => <li key={i}>{i.includes("/delete-account") ? <>{i.replace("/delete-account", "")}<Link href="/delete-account" style={{ color: "var(--dak)" }}>/delete-account</Link></> : i}</li>)}</ul>
+            <ul style={{ paddingLeft: 20, display: "grid", gap: 6, marginTop: 6 }}>{items.map((i) => <li key={i}>{i.includes("/delete-account") ? <>{i.replace("/delete-account", "")}<Link href="/delete-account" style={{ color: "var(--accent)" }}>/delete-account</Link></> : i}</li>)}</ul>
           </section>
         ))}
         <section style={{ marginTop: 20 }}>
           <h2 style={{ fontSize: 19 }}>{lang === "bn" ? "যোগাযোগ" : "Contact"}</h2>
-          <p>{lang === "bn" ? "প্রশ্ন বা অনুরোধ থাকলে লিখুন:" : "Questions or requests:"} <a href={`mailto:${email}`} style={{ color: "var(--dak)" }}>{email}</a></p>
+          <p>{lang === "bn" ? "প্রশ্ন বা অনুরোধ থাকলে লিখুন:" : "Questions or requests:"} <a href={`mailto:${email}`} style={{ color: "var(--accent)" }}>{email}</a></p>
         </section>
       </main>
     </div>

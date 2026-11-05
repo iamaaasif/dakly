@@ -229,7 +229,7 @@ fun CustomersScreen(nav: NavHostController) {
             Spacer(Modifier.height(6.dp))
             when {
                 error != null && items.isEmpty() -> ErrorState(error!!) { reloadTick++ }
-                loading && items.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Dakly.colors.dak) }
+                loading && items.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Dakly.colors.accent) }
                 items.isEmpty() -> EmptyState(
                     Icons.Outlined.People, stringResource(R.string.customers_empty_title), stringResource(R.string.customers_empty_body),
                     stringResource(R.string.qa_import),
@@ -242,7 +242,7 @@ fun CustomersScreen(nav: NavHostController) {
                             onWhatsApp = { Contact.whatsapp(ctx, c.phone); scope.launch { runCatching { repo.logCall(c.id, "whatsapp") } } },
                         )
                     }
-                    if (hasMore) item { Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(24.dp), color = Dakly.colors.dak) } }
+                    if (hasMore) item { Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(24.dp), color = Dakly.colors.accent) } }
                 }
             }
         }
@@ -408,7 +408,7 @@ private fun CustomerDetailContent(
                         Column(Modifier.weight(1f)) {
                             Text(stringResource(R.string.customer_recommend, r.product), fontWeight = FontWeight.SemiBold)
                             Text(r.reason, color = Dakly.colors.ink2, fontSize = 13.sp)
-                            Text(stringResource(R.string.home_send_offer), color = Dakly.colors.dak, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))
+                            Text(stringResource(R.string.home_send_offer), color = Dakly.colors.accent, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))
                         }
                     }
                 }
@@ -458,7 +458,7 @@ private fun ContactButton(icon: ImageVector, label: String, modifier: Modifier, 
         modifier.clip(RoundedCornerShape(14.dp)).background(Dakly.colors.surface).clickable(onClick = onClick).padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(icon, null, tint = Dakly.colors.dak)
+        Icon(icon, null, tint = Dakly.colors.accent)
         Spacer(Modifier.height(4.dp))
         Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
     }
@@ -642,8 +642,8 @@ private fun VoiceCapture(autoStart: Boolean, onResult: (bd.com.dakly.app.data.Vo
                     .clickable(enabled = !working) { toggle() },
                 contentAlignment = Alignment.Center,
             ) {
-                if (working) CircularProgressIndicator(Modifier.size(24.dp), color = Dakly.colors.dak, strokeWidth = 2.dp)
-                else Icon(if (recording) Icons.Outlined.Stop else Icons.Outlined.Mic, stringResource(R.string.qa_voice), tint = if (recording) Dakly.colors.dakInk else Dakly.colors.dak)
+                if (working) CircularProgressIndicator(Modifier.size(24.dp), color = Dakly.colors.accent, strokeWidth = 2.dp)
+                else Icon(if (recording) Icons.Outlined.Stop else Icons.Outlined.Mic, stringResource(R.string.qa_voice), tint = if (recording) Dakly.colors.dakInk else Dakly.colors.accent)
             }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
@@ -708,13 +708,13 @@ fun ImportScreen(nav: NavHostController) {
                 file?.second ?: stringResource(R.string.import_choose), Modifier.fillMaxWidth(), icon = Icons.Outlined.UploadFile,
                 enabled = !busy,
             ) { picker.launch(mimes) }
-            if (busy) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Dakly.colors.dak) }
+            if (busy) Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Dakly.colors.accent) }
 
             preview?.let { p ->
                 DCard {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(stringResource(R.string.import_found, Format.number(ctx, p.rows)), style = MaterialTheme.typography.titleMedium)
-                        if (p.invalid > 0) Text(stringResource(R.string.import_invalid, Format.number(ctx, p.invalid)), color = Dakly.colors.dak, fontSize = 13.sp)
+                        if (p.invalid > 0) Text(stringResource(R.string.import_invalid, Format.number(ctx, p.invalid)), color = Dakly.colors.bad, fontSize = 13.sp)
                         HorizontalDivider(color = Dakly.colors.line)
                         Text(stringResource(R.string.import_columns), fontWeight = FontWeight.SemiBold)
                         listOf(
@@ -727,7 +727,7 @@ fun ImportScreen(nav: NavHostController) {
                                 Text("← " + col, fontWeight = FontWeight.SemiBold)
                             }
                         }
-                        if (p.mapping.phone == null) Text(stringResource(R.string.import_no_phone), color = Dakly.colors.dak)
+                        if (p.mapping.phone == null) Text(stringResource(R.string.import_no_phone), color = Dakly.colors.bad)
                     }
                 }
                 PrimaryButton(

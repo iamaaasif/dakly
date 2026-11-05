@@ -27,7 +27,7 @@ export default async function Merchants({ searchParams }: { searchParams: Promis
         <thead><tr><th>দোকান</th><th>Owner</th><th>Plan</th><th>Customer</th><th>Message (মাস)</th><th>AI</th><th>খরচ</th><th>যোগ দিয়েছে</th><th>অবস্থা</th></tr></thead>
         <tbody>{rows.map((r) => (
           <tr key={r.shop.id}>
-            <td><Link href={`/admin/merchants/${r.shop.id}`} style={{ fontWeight: 600, color: "var(--dak)" }}>{r.shop.name}</Link></td>
+            <td><Link href={`/admin/merchants/${r.shop.id}`} style={{ fontWeight: 600, color: "var(--accent)" }}>{r.shop.name}</Link></td>
             <td>{r.shop.owner.name}<br /><span className="muted">{r.shop.owner.email}</span></td>
             <td>{PLANS[r.plan].name}{r.shop.planUntil && r.plan !== "free" ? <><br /><span className="muted">{dateTimeBn(r.shop.planUntil)}</span></> : null}</td>
             <td>{bn(r.shop._count.customers)}</td><td>{bn(r.wa + r.sms + r.voice)}</td><td>{bn(r.ai)}</td><td>{tk(r.cost)}</td>

@@ -8,10 +8,10 @@ import { logError } from "@/lib/audit";
 
 const page = (ok: boolean, text: string) => new Response(
   `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dakly</title>
-<body style="font-family:system-ui,sans-serif;background:#f3f5f2;color:#13261d;display:grid;place-items:center;min-height:100vh;margin:0;padding:16px">
-<div style="background:#fff;border:1px solid #d5dcd4;border-radius:16px;padding:24px;max-width:360px;text-align:center">
+<body style="font-family:system-ui,sans-serif;background:#f9faf8;color:#070707;display:grid;place-items:center;min-height:100vh;margin:0;padding:16px">
+<div style="background:#fff;border:1px solid #e1e5dc;border-radius:16px;padding:24px;max-width:360px;text-align:center">
 <h2 style="margin:0 0 8px">${ok ? "Facebook Page Connect হয়েছে" : "Connect হয়নি"}</h2><p>${text}</p>
-<a href="dakly://open?path=/settings" style="display:inline-block;background:#c8402a;color:#fff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:600">Dakly App-এ ফিরে যান</a></div></body>`,
+<a href="dakly://open?path=/settings" style="display:inline-block;background:#d6ef67;color:#070707;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:600">Dakly App-এ ফিরে যান</a></div></body>`,
   { headers: { "Content-Type": "text/html; charset=utf-8" } });
 
 export async function GET(req: Request) {

@@ -50,7 +50,7 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
           {!s.suspended && (
             <form action={suspendShop.bind(null, s.id)} className="row-btns">
               <input className="input" name="reason" placeholder="স্থগিত করার কারণ (Merchant দেখবেন)" style={{ flex: 1, minWidth: 200 }} aria-label="কারণ" />
-              <button className="btn ghost" style={{ color: "var(--dak)" }}>স্থগিত করুন</button>
+              <button className="btn ghost" style={{ color: "var(--bad)" }}>স্থগিত করুন</button>
             </form>
           )}
           {s.suspendedReason && <p className="muted">কারণ: {s.suspendedReason}</p>}
@@ -58,7 +58,7 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
             <summary className="muted" style={{ cursor: "pointer" }}>দোকান চিরতরে মুছুন</summary>
             <form action={deleteShop.bind(null, s.id)} className="row-btns" style={{ marginTop: 8 }}>
               <input className="input" name="confirm" placeholder={`নিশ্চিত করতে লিখুন: ${s.name}`} style={{ flex: 1, minWidth: 200 }} aria-label="দোকানের নাম" />
-              <button className="btn ghost" style={{ color: "var(--dak)" }}>সব Data মুছে ফেলুন</button>
+              <button className="btn ghost" style={{ color: "var(--bad)" }}>সব Data মুছে ফেলুন</button>
             </form>
           </details>
         </div>
@@ -76,7 +76,7 @@ export default async function MerchantPage({ params }: { params: Promise<{ id: s
         <div className="card"><h3 style={{ fontSize: 17, marginBottom: 6 }}>সাম্প্রতিক Campaign</h3>
           {s.campaigns.length ? s.campaigns.map((c) => <div key={c.id} className="muted">{dateTimeBn(c.createdAt)} · {c.name} · {bn(c._count.messages)} জন · {c.status}</div>) : <p className="muted">নেই</p>}</div>
         <div className="card"><h3 style={{ fontSize: 17, marginBottom: 6 }}>Support Ticket</h3>
-          {s.ticketList.length ? s.ticketList.map((t) => <div key={t.id}><Link href={`/admin/tickets/${t.id}`} style={{ color: "var(--dak)" }}>{t.subject}</Link> <span className="muted">· {t.status}</span></div>) : <p className="muted">নেই</p>}</div>
+          {s.ticketList.length ? s.ticketList.map((t) => <div key={t.id}><Link href={`/admin/tickets/${t.id}`} style={{ color: "var(--accent)" }}>{t.subject}</Link> <span className="muted">· {t.status}</span></div>) : <p className="muted">নেই</p>}</div>
         <div className="card"><h3 style={{ fontSize: 17, marginBottom: 6 }}>সাম্প্রতিক Error</h3>
           {errors.length ? errors.map((e) => <div key={e.id} className="muted">{dateTimeBn(e.createdAt)} · {e.source}: {e.message.slice(0, 120)}</div>) : <p className="muted">নেই</p>}</div>
       </div>

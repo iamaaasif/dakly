@@ -240,7 +240,7 @@ fun ChatScreen(nav: NavHostController, customerId: String) {
                 error != null && t == null -> Box(Modifier.weight(1f)) {
                     bd.com.dakly.app.ui.components.ErrorState(error!!) { scope.launch { refresh(true) } }
                 }
-                t == null -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Dakly.colors.dak) }
+                t == null -> Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Dakly.colors.accent) }
                 else -> LazyColumn(
                     state = list, modifier = Modifier.weight(1f).fillMaxWidth(),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
@@ -301,7 +301,7 @@ fun ChatScreen(nav: NavHostController, customerId: String) {
                             try { text = repo.suggestReply(customerId).text } catch (e: Exception) { ctx.toastError(e) } finally { suggesting = false }
                         }
                     }) {
-                        if (suggesting) CircularProgressIndicator(Modifier.size(20.dp), color = Dakly.colors.dak, strokeWidth = 2.dp)
+                        if (suggesting) CircularProgressIndicator(Modifier.size(20.dp), color = Dakly.colors.accent, strokeWidth = 2.dp)
                         else Icon(Icons.Outlined.AutoAwesome, stringResource(R.string.chat_ai_suggest), tint = Dakly.colors.haldi)
                     }
                     OutlinedTextField(
@@ -386,13 +386,13 @@ private fun Bubble(m: ChatMessage) {
                         "read" -> Icons.Outlined.DoneAll to Dakly.colors.sky
                         "delivered" -> Icons.Outlined.DoneAll to Dakly.colors.ink3
                         "sent", "test" -> Icons.Outlined.Done to Dakly.colors.ink3
-                        "failed" -> Icons.Outlined.ErrorOutline to Dakly.colors.dak
+                        "failed" -> Icons.Outlined.ErrorOutline to Dakly.colors.bad
                         else -> Icons.Outlined.Schedule to Dakly.colors.ink3
                     }
                     Icon(icon, m.status, Modifier.size(14.dp), tint = tint)
                 }
             }
-            if (m.status == "failed" && !m.error.isNullOrBlank()) Text(m.error, color = Dakly.colors.dak, fontSize = 11.sp)
+            if (m.status == "failed" && !m.error.isNullOrBlank()) Text(m.error, color = Dakly.colors.bad, fontSize = 11.sp)
         }
     }
 }

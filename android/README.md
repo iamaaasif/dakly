@@ -61,3 +61,7 @@ Version: `version.properties` (raise `versionCode` by 1 for every Play upload).
 ## Adding a language
 
 Add `res/values-<code>/strings.xml`, add the code to `res/xml/locales_config.xml`, to `resourceConfigurations` in `app/build.gradle.kts`, and to the language chips in `AccountScreens.kt` (`AppLanguageCard`).
+
+## Look and feel
+
+Colours and type follow wowapps.io: lime `#D6EF67` (fills only), ink `#070707`, forest green `#347421` (text, links, selected borders), Inter. Tokens live in `ui/theme/Theme.kt` (`dak`, `accent`, `bad`) and mirror `backend/app/globals.css`. Phones get a bottom bar; screens 600dp and wider get a side rail with content capped at 840dp. `res/font/inter.ttf` is Inter (SIL Open Font License 1.1); weights apply on Android 8+.

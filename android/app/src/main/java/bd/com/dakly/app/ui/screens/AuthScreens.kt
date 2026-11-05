@@ -155,7 +155,7 @@ fun AuthScreen(onSignedIn: () -> Unit) {
                             supporting = if (mode == AuthMode.Register) stringResource(R.string.auth_password_hint) else null,
                         )
                     }
-                    if (error != null) Text(error!!, color = Dakly.colors.dak)
+                    if (error != null) Text(error!!, color = Dakly.colors.bad)
 
                     val canSubmit = when (mode) {
                         AuthMode.Login -> email.isNotBlank() && password.isNotBlank()
@@ -183,7 +183,7 @@ fun AuthScreen(onSignedIn: () -> Unit) {
                             }
                         }
                         else -> TextButton(onClick = { mode = AuthMode.Login; error = null }, Modifier.align(Alignment.CenterHorizontally)) {
-                            Text(stringResource(R.string.auth_have_account), color = Dakly.colors.dak, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.auth_have_account), color = Dakly.colors.accent, fontWeight = FontWeight.SemiBold)
                         }
                     }
                     TextButton(
@@ -230,7 +230,7 @@ fun ShopStatusScreen(status: String, reason: String?, onRetry: () -> Unit, onLog
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val pending = status == "pending"
-        Icon(if (pending) Icons.Outlined.HourglassTop else Icons.Outlined.Block, null, Modifier.size(56.dp), tint = if (pending) Dakly.colors.haldi else Dakly.colors.dak)
+        Icon(if (pending) Icons.Outlined.HourglassTop else Icons.Outlined.Block, null, Modifier.size(56.dp), tint = if (pending) Dakly.colors.haldi else Dakly.colors.bad)
         Spacer(Modifier.height(16.dp))
         Text(
             stringResource(if (pending) R.string.status_pending_title else R.string.status_suspended_title),

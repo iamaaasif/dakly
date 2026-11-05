@@ -15,7 +15,7 @@ const SEGS = [
 const CHANNELS = [
   ["wa", "WhatsApp", "W", "#1fa855", "পড়ার হার সবচেয়ে বেশি। না পৌঁছালে SMS-এ যাবে (SMS বাছলে)"],
   ["sms", "SMS", "S", "#2f6690", "যাদের WhatsApp নেই তাদের কাছেও পৌঁছায়"],
-  ["voice", "AI Voice Call", "☎", "#c8402a", "AI ফোন করে Offer জানাবে, আগ্রহী হলে Customer ১ চাপবেন"],
+  ["voice", "AI Voice Call", "☎", "#070707", "AI ফোন করে Offer জানাবে, আগ্রহী হলে Customer ১ চাপবেন"],
 ] as const;
 const STEP = ["", "কাকে পাঠাবেন?", "কোথায় পাঠাবেন?", "কী বলবেন?", "দেখে নিন, পাঠান"];
 

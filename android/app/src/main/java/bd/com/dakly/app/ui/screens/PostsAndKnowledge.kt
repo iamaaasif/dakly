@@ -143,7 +143,7 @@ fun PostsScreen(nav: NavHostController) {
                             scope.launch { try { text = repo.aiPost(prompt.trim(), tone).text } catch (e: Exception) { ctx.toastError(e) } finally { writing = false } }
                         }
                         if (text.isNotBlank() || writing) {
-                            if (writing) LinearProgressIndicator(Modifier.fillMaxWidth(), color = Dakly.colors.dak)
+                            if (writing) LinearProgressIndicator(Modifier.fillMaxWidth(), color = Dakly.colors.accent)
                             Field(text, { text = it }, stringResource(R.string.posts_text), singleLine = false, minLines = 6)
                             SecondaryButton(
                                 at?.let { Format.dateTime(ctx, it) } ?: stringResource(R.string.posts_pick_time),
@@ -178,12 +178,12 @@ fun PostsScreen(nav: NavHostController) {
                                 if (p.status == "scheduled") IconButton(onClick = { cancelId = p.id }) { Icon(Icons.Outlined.Delete, stringResource(R.string.cancel)) }
                             }
                             Text(p.text, maxLines = 5, overflow = TextOverflow.Ellipsis, color = Dakly.colors.ink2)
-                            if (!p.error.isNullOrBlank()) Text(p.error, color = Dakly.colors.dak, fontSize = 12.sp)
+                            if (!p.error.isNullOrBlank()) Text(p.error, color = Dakly.colors.bad, fontSize = 12.sp)
                         }
                     }
                 }
                 is Load.Failed -> item { TextButton(onClick = posts::reload) { Text(stringResource(R.string.retry)) } }
-                Load.Loading -> item { LinearProgressIndicator(Modifier.fillMaxWidth(), color = Dakly.colors.dak) }
+                Load.Loading -> item { LinearProgressIndicator(Modifier.fillMaxWidth(), color = Dakly.colors.accent) }
             }
         }
     }
@@ -347,7 +347,7 @@ fun KnowledgeEditScreen(nav: NavHostController, id: String?, initialType: String
         actions = { if (id != null) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Outlined.Delete, stringResource(R.string.delete)) } },
     ) { inner ->
         if (!loaded) {
-            Box(Modifier.padding(inner).fillMaxWidth()) { LinearProgressIndicator(Modifier.fillMaxWidth(), color = Dakly.colors.dak) }
+            Box(Modifier.padding(inner).fillMaxWidth()) { LinearProgressIndicator(Modifier.fillMaxWidth(), color = Dakly.colors.accent) }
             return@ScreenFrame
         }
         Column(

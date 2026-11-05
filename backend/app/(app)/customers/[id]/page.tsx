@@ -41,7 +41,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
       </div>
       {reco && (
         <div className="note-ai"><Icon name="spark" size={16} /><div>{t("পরের Offer-এ দিন:")} <b>{reco.product}</b>. {reco.reason}.
-          {" "}<Link href={`/campaigns/new?${new URLSearchParams({ segment: seg, offer: t("{p}-এ বিশেষ ছাড়", { p: reco.product }) })}`} style={{ color: "var(--dak)", fontWeight: 600 }}>{t("Campaign তৈরি করুন")} →</Link></div></div>
+          {" "}<Link href={`/campaigns/new?${new URLSearchParams({ segment: seg, offer: t("{p}-এ বিশেষ ছাড়", { p: reco.product }) })}`} style={{ color: "var(--accent)", fontWeight: 600 }}>{t("Campaign তৈরি করুন")} →</Link></div></div>
       )}
       <div className="grid2">
         <div className="card form"><h3 style={{ fontSize: 17 }}>{t("নতুন Order যোগ করুন")}</h3><OrderForm customerId={c.id} /></div>
