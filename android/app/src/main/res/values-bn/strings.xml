@@ -24,6 +24,8 @@
     <string name="sort_name">নাম</string>
     <string name="offline_title">ইন্টারনেট সংযোগ নেই</string>
     <string name="offline_body">মোবাইল ডেটা বা Wi-Fi চালু আছে কিনা দেখে আবার চেষ্টা করুন।</string>
+    <string name="server_unreachable_title">Dakly-তে সংযোগ হচ্ছে না</string>
+    <string name="server_unreachable_body">আপনার ইন্টারনেট চালু আছে, কিন্তু Dakly Server (%1$s) সাড়া দিচ্ছে না। কয়েক মিনিট পর আবার চেষ্টা করুন।</string>
     <string name="error_title">কিছু একটা সমস্যা হয়েছে</string>
     <string name="error_body">একটু পরে আবার চেষ্টা করুন।</string>
     <string name="err_invalid_phone">সঠিক মোবাইল নম্বর দিন</string>

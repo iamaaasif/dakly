@@ -27,7 +27,7 @@ Native Android app for Dakly merchants, written in Kotlin with Jetpack Compose (
 | Plan and billing | Plans priced in the shop's currency, pay online in a Custom Tab |
 | Support | Open tickets and read replies |
 
-Deep links: `https://app.dakly.com.bd/...` (App Links, verified by the backend's `assetlinks.json`) and `dakly://open?path=/...` open the matching screen.
+Deep links: `https://dakly.wowapps.io/...` (App Links, verified by the backend's `assetlinks.json`) and `dakly://open?path=/...` open the matching screen.
 
 ## Code map
 

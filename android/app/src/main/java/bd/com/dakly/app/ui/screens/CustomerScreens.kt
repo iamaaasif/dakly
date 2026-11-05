@@ -123,10 +123,12 @@ import bd.com.dakly.app.ui.toast
 import bd.com.dakly.app.ui.toastError
 import bd.com.dakly.app.util.Contact
 import bd.com.dakly.app.util.Format
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 private val segmentFilters = listOf<String?>(null, "vip", "regular", "new", "inactive")
@@ -558,14 +560,18 @@ fun NewCustomerScreen(nav: NavHostController, startWithVoice: Boolean) {
             ) {
                 saving = true
                 scope.launch {
-                    try {
-                        val r = repo.addCustomer(NewCustomer(name.trim(), phone.trim(), items.ifBlank { null }, amount.toLongOrNull(), area.ifBlank { null }, source))
-                        ctx.toast(ctx.getString(R.string.customer_saved))
-                        nav.popBackStack()
-                        nav.navigate(Routes.customer(r.id))
+                    // Only the network call is guarded; a saved customer never shows an error afterwards.
+                    val r = try {
+                        repo.addCustomer(NewCustomer(name.trim(), phone.trim(), items.ifBlank { null }, amount.toLongOrNull(), area.ifBlank { null }, source))
                     } catch (e: Exception) {
                         ctx.toastError(e)
+                        null
                     } finally { saving = false }
+                    if (r != null) withContext(Dispatchers.Main) {
+                        ctx.toast(ctx.getString(R.string.customer_saved))
+                        // One navigation that replaces the form: no double transition.
+                        nav.navigate(Routes.customer(r.id)) { popUpTo(Routes.NEW_CUSTOMER) { inclusive = true } }
+                    }
                 }
             }
         }

@@ -19,7 +19,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import bd.com.dakly.app.R
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
 /** Dakly colours, aligned with wowapps.io: lime #D6EF67, ink #070707, forest #347421. Same tokens as the web app. */
@@ -91,16 +93,20 @@ val Inter = FontFamily(
     },
 )
 
-private val DaklyType = Typography().let { base ->
+private val DaklyType = Typography().let { m3 ->
+    // Material's letter-spacing (0.1-0.5sp) is tuned for Roboto; Inter reads best tight, as on wowapps.io.
+    fun TextStyle.inter(tracking: TextUnit = 0.sp) = copy(fontFamily = Inter, letterSpacing = tracking)
+    val base = m3
+    val tight = (-0.02).em
     val t = base.copy(
-        displayLarge = base.displayLarge.copy(fontFamily = Inter), displayMedium = base.displayMedium.copy(fontFamily = Inter),
-        displaySmall = base.displaySmall.copy(fontFamily = Inter), headlineLarge = base.headlineLarge.copy(fontFamily = Inter),
-        headlineMedium = base.headlineMedium.copy(fontFamily = Inter), headlineSmall = base.headlineSmall.copy(fontFamily = Inter),
-        titleLarge = base.titleLarge.copy(fontFamily = Inter), titleMedium = base.titleMedium.copy(fontFamily = Inter),
-        titleSmall = base.titleSmall.copy(fontFamily = Inter), bodyLarge = base.bodyLarge.copy(fontFamily = Inter),
-        bodyMedium = base.bodyMedium.copy(fontFamily = Inter), bodySmall = base.bodySmall.copy(fontFamily = Inter),
-        labelLarge = base.labelLarge.copy(fontFamily = Inter), labelMedium = base.labelMedium.copy(fontFamily = Inter),
-        labelSmall = base.labelSmall.copy(fontFamily = Inter),
+        displayLarge = base.displayLarge.inter(tight), displayMedium = base.displayMedium.inter(tight),
+        displaySmall = base.displaySmall.inter(tight), headlineLarge = base.headlineLarge.inter(tight),
+        headlineMedium = base.headlineMedium.inter(tight), headlineSmall = base.headlineSmall.inter(tight),
+        titleLarge = base.titleLarge.inter((-0.01).em), titleMedium = base.titleMedium.inter(),
+        titleSmall = base.titleSmall.inter(), bodyLarge = base.bodyLarge.inter(),
+        bodyMedium = base.bodyMedium.inter(), bodySmall = base.bodySmall.inter(),
+        labelLarge = base.labelLarge.inter(), labelMedium = base.labelMedium.inter(),
+        labelSmall = base.labelSmall.inter(),
     )
     t.copy(
         headlineLarge = t.headlineLarge.copy(fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, lineHeight = 34.sp),

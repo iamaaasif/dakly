@@ -2,6 +2,7 @@ package bd.com.dakly.app.ui
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -16,6 +17,9 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -191,6 +195,19 @@ private val tabs = listOf(
     Tab(Routes.MORE, R.string.tab_more, Icons.Outlined.Menu),
 )
 
+/**
+ * Tab label that always fits five tabs: follows the phone's text size up to 115%, then stops growing
+ * (at larger system sizes, labels like "Customers" were cut to "Custome").
+ */
+@Composable
+private fun TabLabel(text: String) {
+    val scale = LocalDensity.current.fontScale
+    Text(
+        text, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis, letterSpacing = 0.sp,
+        fontSize = (12f * minOf(1f, 1.15f / scale)).sp,
+    )
+}
+
 /** Opens a top-level tab the way bottom navigation should: one copy, state kept. */
 fun NavHostController.openTab(route: String) = navigate(route) {
     popUpTo(graph.findStartDestination().id) { saveState = true }
@@ -244,7 +261,7 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
                             selected = current == t.route,
                             onClick = { nav.openTab(t.route) },
                             icon = { tabIcon(t) },
-                            label = { Text(stringResource(t.label), maxLines = 1) },
+                            label = { TabLabel(stringResource(t.label)) },
                             colors = tabColors,
                         )
                     }
@@ -252,7 +269,10 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
             }
         },
     ) { pad ->
-        Row(Modifier.fillMaxSize().padding(bottom = pad.calculateBottomPadding()).consumeWindowInsets(pad)) {
+        // Only the bottom (navigation bar) is handled here. Consuming all of `pad` would also mark the
+        // status bar as handled, and every screen header would then draw under the clock and icons.
+        val bottomPad = PaddingValues(bottom = pad.calculateBottomPadding())
+        Row(Modifier.fillMaxSize().padding(bottomPad).consumeWindowInsets(bottomPad)) {
             if (showBar && wide) {
                 NavigationRail(containerColor = Dakly.colors.surface) {
                     Spacer(Modifier.weight(1f))
@@ -261,7 +281,7 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
                             selected = current == t.route,
                             onClick = { nav.openTab(t.route) },
                             icon = { tabIcon(t) },
-                            label = { Text(stringResource(t.label), maxLines = 1) },
+                            label = { TabLabel(stringResource(t.label)) },
                             colors = NavigationRailItemDefaults.colors(
                                 selectedIconColor = Dakly.colors.dakInk, selectedTextColor = Dakly.colors.ink,
                                 indicatorColor = Dakly.colors.dak,

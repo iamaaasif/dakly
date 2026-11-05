@@ -1,6 +1,6 @@
 # Dakly end-to-end test results
 
-Run: 2026-11-05T01:55:43.236Z  
+Run: 2026-11-05T06:50:09.281Z  
 Result: **125/125 passed**
 
 Every outside provider is the mock in `test/mock/server.mjs`.

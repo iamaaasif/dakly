@@ -44,12 +44,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-            <!-- App Links: https://app.dakly.com.bd/customers/123 etc. open the matching screen -->
+            <!-- App Links: https://dakly.wowapps.io/customers/123 etc. open the matching screen -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https" android:host="app.dakly.com.bd"/>
+                <data android:scheme="https" android:host="dakly.wowapps.io"/>
             </intent-filter>
 
             <!-- dakly://open?path=/settings (return from Facebook connect in the browser) -->

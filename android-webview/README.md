@@ -1,6 +1,6 @@
 # Dakly for Android
 
-The merchant app for Dakly. It opens the Dakly web app (`https://app.dakly.com.bd`) full screen in a hardened WebView, so every screen the web has (home dashboard, customers, campaigns, AI posts, notifications, settings) is in the app, and every web update reaches the app without a new release.
+The merchant app for Dakly. It opens the Dakly web app (`https://dakly.wowapps.io`) full screen in a hardened WebView, so every screen the web has (home dashboard, customers, campaigns, AI posts, notifications, settings) is in the app, and every web update reaches the app without a new release.
 
 What the native side adds:
 
@@ -10,7 +10,7 @@ What the native side adds:
 | Add customer by voice | Asks for the microphone permission the first time, only for the Dakly site |
 | WhatsApp, phone, other links | Open in the right app; other websites open in the browser |
 | Facebook Page connect | Opens in the phone's browser (Facebook blocks login inside apps), then returns with `dakly://open?path=/settings` |
-| App Links | Any `https://app.dakly.com.bd/...` link opens in the app (verified by `/.well-known/assetlinks.json`) |
+| App Links | Any `https://dakly.wowapps.io/...` link opens in the app (verified by `/.well-known/assetlinks.json`) |
 | Offline / server down | Bangla error screen with retry; retries by itself when the internet comes back |
 | Languages | App screens in English (default) and Bangla; users pick the app language in Android settings. The web gets the same language through Accept-Language |
 | Light and dark mode | Follows the phone; the web gets the matching `prefers-color-scheme` |

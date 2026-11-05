@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only: allow plain http so a test phone can reach a laptop on the same Wi-Fi
+     (e.g. -PdaklyApi=http://192.168.1.20:3000). Release builds use src/main: HTTPS only. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true"/>
+</network-security-config>

@@ -30,3 +30,8 @@ local.properties
 
 # OS
 .DS_Store
+
+# Test output (regenerated on every run)
+backend/test/mock/certs/
+backend/test/results/*.json
+walkthrough/

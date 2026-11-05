@@ -44,13 +44,12 @@ p{margin:0}
 
 /* shell */
 .shell{min-height:100%;display:grid;grid-template-rows:auto 1fr auto}
-.appbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.appbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--paper) 96%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
 .shop-av{width:38px;height:38px;border-radius:12px;background:var(--dak);color:var(--dak-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;flex:none}
 .appbar .who{flex:1;min-width:0}
 .appbar .who b{display:block;font-family:var(--f-display);font-size:16px;line-height:1.15}
 .appbar .who span{font-size:12.5px;color:var(--ink-3)}
 .icon-btn{position:relative;width:40px;height:40px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none;transition:background .15s,border-color .15s,transform .15s var(--ease)}
-.icon-btn:hover{border-color:var(--ink-3)}
 .icon-btn:active{transform:scale(.94)}
 .icon-btn .dot{position:absolute;top:5px;right:5px;min-width:16px;height:16px;border-radius:8px;background:var(--dak);color:var(--dak-ink);box-shadow:0 0 0 2px var(--surface);font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
 main.view{padding:4px max(16px,env(safe-area-inset-right,0px)) calc(92px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px;max-width:1180px;width:100%;min-width:0;animation:viewin .28s var(--ease) both}
@@ -100,9 +99,7 @@ main.view>*{min-width:0}
 .btn{border:1px solid transparent;border-radius:var(--r-pill);padding:11px 18px;min-height:44px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center;transition:background .18s,color .18s,border-color .18s,transform .15s var(--ease),box-shadow .18s}
 .btn:active:not(:disabled){transform:scale(.97)}
 .btn.primary{background:var(--dak);color:var(--dak-ink);border-color:var(--dak-edge)}
-.btn.primary:hover:not(:disabled){background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .btn.ghost{background:var(--sunk);color:var(--ink);border-color:var(--line)}
-.btn.ghost:hover:not(:disabled){border-color:var(--ink-3)}
 .btn.block{width:100%}
 .btn.sm{padding:7px 14px;min-height:36px;font-size:13.5px}
 @media (min-width:900px){.btn{min-height:40px}.btn.sm{min-height:34px}}
@@ -118,7 +115,6 @@ main.view>*{min-width:0}
 .chips::-webkit-scrollbar{display:none}
 .chips>*{scroll-snap-align:start;flex:none}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:13.5px;white-space:nowrap;color:var(--ink-2);transition:background .15s,color .15s,border-color .15s}
-.chip:hover{border-color:var(--ink-3)}
 .chip.on{background:var(--dak);color:var(--dak-ink);border-color:var(--dak-edge);font-weight:600}
 .greet h2{font-size:clamp(22px,2.2vw + 14px,30px);font-weight:700}
 .greet p{color:var(--ink-2);font-size:14px}
@@ -145,7 +141,6 @@ main.view>*{min-width:0}
 .hero p{color:var(--hero-2);font-size:14px}
 .hero .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
 .hero .btn.primary{background:var(--dak);color:#070707;border-color:var(--dak-edge)}
-.hero .btn.primary:hover:not(:disabled){background:#fdfdfd;color:#070707;border-color:#fdfdfd}
 .hero .btn.later{background:transparent;color:var(--hero-2);border:1px solid rgba(255,255,255,.2)}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 @media (max-width:359px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -171,7 +166,6 @@ main.view>*{min-width:0}
 .row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
 a.row{transition:background .15s}
-a.row:hover{background:var(--paper)}
 a.row:active{background:var(--sunk)}
 .row>*{min-width:0}
 .row .meta,.row .nm{overflow-wrap:anywhere}
@@ -288,7 +282,6 @@ a.row:active{background:var(--sunk)}
 .adm-nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:10px 0 0;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
 .adm-nav::-webkit-scrollbar{display:none}
 .adm-nav a{white-space:nowrap;padding:10px 14px;border-radius:12px 12px 0 0;font-size:14px;color:var(--hero-2);transition:color .15s,background .15s}
-.adm-nav a:hover{color:var(--hero-fg)}
 .adm-nav a.on{background:var(--paper);color:var(--ink);font-weight:600;box-shadow:inset 0 3px 0 var(--dak)}
 .adm main{padding:16px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px;max-width:1280px;width:100%;margin:0 auto}
 .adm h1{font-size:clamp(22px,1.4vw + 16px,28px)}
@@ -301,8 +294,18 @@ a.row:active{background:var(--sunk)}
 .actions-grid{display:grid;gap:12px}
 @media (min-width:700px){.actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
+/* hover only where a real pointer can hover: on touch screens :hover sticks after a tap */
+@media (hover:hover){
+  .icon-btn:hover{border-color:var(--ink-3)}
+  .btn.primary:hover:not(:disabled){background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .btn.ghost:hover:not(:disabled){border-color:var(--ink-3)}
+  .chip:hover{border-color:var(--ink-3)}
+  .hero .btn.primary:hover:not(:disabled){background:#fdfdfd;color:#070707;border-color:#fdfdfd}
+  a.row:hover{background:var(--paper)}
+  .adm-nav a:hover{color:var(--hero-fg)}
+}
+
 /* motion + touch polish */
-@media (hover:none){a.row:hover,.tabs a:hover,.icon-btn:hover,.chip:hover{background:revert}}
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}

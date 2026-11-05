@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import type { Shop } from "@prisma/client";
 import { z } from "zod";
 import { db } from "./db";
-import { normalizePhone, toAsciiDigits, countryDefaults, isLang, DEFAULT_COUNTRY, COUNTRIES } from "./i18n";
+import { normalizePhone, toAsciiDigits, countryDefaults, isLang, DEFAULT_COUNTRY, COUNTRIES, translator } from "./i18n";
 import { writeCampaignMessage, writeFacebookPost, aiEnabled } from "./ai";
 import { withAi, AiLimitError } from "./usage";
 import { queueCampaign, processQueue, audience, usedThisMonth } from "./send";
@@ -183,7 +183,7 @@ export async function createCampaign(shop: Shop, input: unknown, after?: (fn: ()
   if (!n) return { error: await tr("এই দলে কোনো Customer নেই") };
   if (n > left) return { error: await tr("এই মাসে আর {a}টি Message পাঠাতে পারবেন, কিন্তু এই দলে {b} জন আছেন। ছোট দল বাছুন বা Plan Upgrade করুন।", { a: Math.max(0, left), b: n }) };
   const c = await db.campaign.create({
-    data: { shopId: shop.id, name: d.name.trim() || "নতুন Campaign", segment: d.segment, message: d.message.trim(), channels: d.channels, status: sendAt ? "scheduled" : "draft", sendAt },
+    data: { shopId: shop.id, name: d.name.trim() || translator(isLang(shop.language) ? shop.language : "bn")("নতুন Campaign"), segment: d.segment, message: d.message.trim(), channels: d.channels, status: sendAt ? "scheduled" : "draft", sendAt },
   });
   if (!sendAt) {
     await queueCampaign(c.id);

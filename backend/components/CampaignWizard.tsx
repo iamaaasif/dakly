@@ -19,6 +19,15 @@ const CHANNELS = [
 ] as const;
 const STEP = ["", "কাকে পাঠাবেন?", "কোথায় পাঠাবেন?", "কী বলবেন?", "দেখে নিন, পাঠান"];
 
+/** Cuts an offer to ~32 characters on a word boundary, with an ellipsis, for the default campaign name. */
+const short = (s: string, max = 32) => {
+  const t = s.trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max + 1);
+  const sp = cut.lastIndexOf(" ");
+  return (sp > 12 ? cut.slice(0, sp) : t.slice(0, max)).replace(/[\s,.;:–-]+$/, "") + "…";
+};
+
 export function CampaignWizard(props: {
   shopName: string; counts: Record<string, number>; sample: Record<string, string>; initialSegment: string;
   ready: { wa: boolean; sms: boolean; voice: boolean }; left: number | null;
@@ -59,7 +68,7 @@ export function CampaignWizard(props: {
     setErr("");
     startBusy(async () => {
       const r = await createCampaign({
-        name: name || `${t(SEGS.find((s) => s[0] === segment)?.[1] ?? "")} · ${offer.slice(0, 30) || "Offer"}`,
+        name: name || `${t(SEGS.find((s) => s[0] === segment)?.[1] ?? "")} · ${short(offer) || "Offer"}`,
         segment, message, channels, when, sendAt: sendAt ? new Date(sendAt).toISOString() : undefined,
       });
       if (r.error) setErr(r.error); else router.push(`/campaigns/${r.id}`);

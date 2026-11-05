@@ -91,7 +91,9 @@ import bd.com.dakly.app.ui.theme.Dakly
 import bd.com.dakly.app.ui.toast
 import bd.com.dakly.app.ui.toastError
 import bd.com.dakly.app.util.Format
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -272,22 +274,25 @@ fun CampaignWizardScreen(nav: NavHostController, initialSegment: String?, initia
                         if (step < steps - 1) { step++; return@PrimaryButton }
                         sending = true
                         scope.launch {
-                            try {
-                                val r = repo.createCampaign(
+                            // Only the network call is guarded: once the server has accepted the campaign,
+                            // nothing after it may show an error (the seller could send it twice).
+                            val r = try {
+                                repo.createCampaign(
                                     NewCampaign(
                                         name = name.ifBlank { null }, segment = segment, message = message.trim(),
                                         channels = channelsFor(voice, wa, sms), `when` = if (later) "later" else "now",
                                         sendAt = if (later) sendAt else null,
                                     ),
                                 )
-                                ctx.toast(ctx.getString(if (later) R.string.wizard_scheduled_ok else R.string.wizard_sent_ok))
-                                nav.popBackStack()
-                                nav.navigate(Routes.campaign(r.id))
-                            } catch (e: ApiException) {
-                                ctx.toastError(e)
                             } catch (e: Exception) {
                                 ctx.toastError(e)
+                                null
                             } finally { sending = false }
+                            if (r != null) withContext(Dispatchers.Main) {
+                                ctx.toast(ctx.getString(if (later) R.string.wizard_scheduled_ok else R.string.wizard_sent_ok))
+                                // One navigation that replaces the wizard: no double transition, so a quick back tap is safe.
+                                nav.navigate(Routes.campaign(r.id)) { popUpTo(Routes.NEW_CAMPAIGN) { inclusive = true } }
+                            }
                         }
                     }
                 }

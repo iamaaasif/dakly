@@ -58,7 +58,7 @@ sealed interface Load<out T> {
 
 @Composable
 fun errorText(e: Throwable): String = when (e) {
-    is OfflineException -> stringResource(R.string.offline_body)
+    is OfflineException -> if (e.deviceOnline) stringResource(R.string.server_unreachable_body, e.host) else stringResource(R.string.offline_body)
     else -> e.message?.takeIf { it.isNotBlank() } ?: stringResource(R.string.error_body)
 }
 
@@ -75,7 +75,8 @@ fun <T> LoadContent(state: Load<T>, onRetry: () -> Unit, content: @Composable (T
 
 @Composable
 fun ErrorState(error: Throwable, onRetry: () -> Unit) {
-    val offline = error is OfflineException
+    val offline = error is OfflineException && !error.deviceOnline
+    val unreachable = error is OfflineException && error.deviceOnline
     Column(
         Modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -84,7 +85,7 @@ fun ErrorState(error: Throwable, onRetry: () -> Unit) {
         Icon(if (offline) Icons.Outlined.CloudOff else Icons.Outlined.ErrorOutline, null, Modifier.size(48.dp), tint = Dakly.colors.ink3)
         Spacer(Modifier.height(16.dp))
         Text(
-            stringResource(if (offline) R.string.offline_title else R.string.error_title),
+            stringResource(if (offline) R.string.offline_title else if (unreachable) R.string.server_unreachable_title else R.string.error_title),
             style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(6.dp))

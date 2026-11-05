@@ -36,7 +36,12 @@ import kotlin.coroutines.resumeWithException
 class ApiException(val status: Int, val code: String?, override val message: String) : Exception(message)
 
 /** No connection, DNS failure or timeout. */
-class OfflineException(cause: Throwable) : IOException(cause)
+/**
+ * The request never got an HTTP answer. [deviceOnline] tells the two cases apart:
+ * false = the phone has no working internet; true = the internet works but the Dakly server at [host]
+ * could not be reached (server down, wrong address in the build, DNS or TLS problem).
+ */
+class OfflineException(cause: Throwable, val deviceOnline: Boolean = false, val host: String = "") : IOException(cause)
 
 val DaklyJson = Json {
     ignoreUnknownKeys = true
@@ -136,7 +141,7 @@ class ApiClient(context: Context, base: String, private val session: SessionStor
         val response = try {
             http.newCall(request).await()
         } catch (e: IOException) {
-            throw OfflineException(e)
+            throw OfflineException(e, deviceOnline(), baseUrl.host)
         }
         response.use { r ->
             val text = r.body?.string().orEmpty()
@@ -170,6 +175,14 @@ class ApiClient(context: Context, base: String, private val session: SessionStor
         })
         cont.invokeOnCancellation { runCatching { cancel() } }
     }
+
+    /** True when Android reports a network that has passed its internet check (Wi-Fi or mobile data). */
+    private fun deviceOnline(): Boolean = runCatching {
+        val cm = appContext.getSystemService(android.net.ConnectivityManager::class.java) ?: return true
+        val caps = cm.getNetworkCapabilities(cm.activeNetwork) ?: return false
+        caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }.getOrDefault(true)
 
     companion object {
         private val JSON = "application/json; charset=utf-8".toMediaType()
