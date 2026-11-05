@@ -166,7 +166,8 @@ export async function parseCustomerSpeech(text: string, country = "BD"): Promise
 }
 
 /** Text to speech (mp3) for AI voice calls, in the shop's language. */
-export async function speak(text: string, lang: string = "bn"): Promise<ArrayBuffer> {
+/** Speech for a call. "mp3" for Twilio; "pcm" is raw 24 kHz 16-bit mono, which Asterisk plays as .sln24. */
+export async function speak(text: string, lang: string = "bn", format: "mp3" | "pcm" = "mp3"): Promise<ArrayBuffer> {
   const res = await fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST",
     headers: { Authorization: `Bearer ${KEY()}`, "Content-Type": "application/json" },
@@ -175,7 +176,7 @@ export async function speak(text: string, lang: string = "bn"): Promise<ArrayBuf
       voice: process.env.OPENAI_TTS_VOICE || "coral",
       input: text,
       instructions: lang === "bn" ? "Speak in warm, natural Bangladeshi Bangla, like a friendly shop assistant on the phone. Moderate pace." : `Speak in warm, natural ${LANGS[isLang(lang) ? lang : "en"].name}, like a friendly shop assistant on the phone. Moderate pace.`,
-      response_format: "mp3",
+      response_format: format,
     }),
   });
   if (!res.ok) throw new Error(`TTS failed ${res.status}: ${(await res.text()).slice(0, 300)}`);

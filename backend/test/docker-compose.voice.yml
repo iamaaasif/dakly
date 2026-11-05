@@ -1,0 +1,30 @@
+# Voice-call test: Dakly's real Asterisk calls a fake IPCallBD (another Asterisk, test/asterisk/fake-ipcallbd.sh).
+#   sh test/voice-sip.sh
+services:
+  asterisk:
+    build: { args: { BASE: "${ASTERISK_BASE:-alpine:3.22}" } }
+    ports: !reset []
+    environment:
+      SIP_TRUNK_HOST: fake-ipcallbd
+      SIP_TRUNK_PORT: "5070"
+      SIP_TRUNK_USER: dakly
+      SIP_TRUNK_PASS: fake-pass
+      SIP_CALLER_ID: "09612345678"
+      SIP_CODECS: alaw
+      SIP_RING_SECONDS: "8"
+      SIP_KEY_WAIT_SECONDS: "5"
+      ASTERISK_ARI_PASSWORD: ari-test-pass
+      DAKLY_INTERNAL_URL: http://app:3000
+    depends_on: [fake-ipcallbd]
+  fake-ipcallbd:
+    image: dakly-test-asterisk
+    build: { context: ./deploy/asterisk, args: { BASE: "${ASTERISK_BASE:-alpine:3.22}" } }
+    entrypoint: ["/bin/sh", "/fake.sh"]
+    environment: { FAKE_PORT: "5070", FAKE_PASS: fake-pass }
+    volumes: ["./test/asterisk/fake-ipcallbd.sh:/fake.sh:ro", "./test/results/voice-rec:/rec"]
+  app:
+    environment:
+      ASTERISK_ARI_URL: http://asterisk:8088
+      ASTERISK_ARI_PASSWORD: ari-test-pass
+      SIP_COUNTRIES: BD
+      SIP_MAX_CALLS: "2"

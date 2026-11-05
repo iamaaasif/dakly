@@ -291,6 +291,13 @@ export async function toggleKnowledge(id: string, active: boolean) {
   await db.knowledgeItem.updateMany({ where: { id, shopId: shop.id }, data: { active } });
   revalidatePath("/knowledge");
 }
+export async function saveWaCall(_: FormState, fd: FormData): Promise<FormState> {
+  const { shop } = await requireShop();
+  const r = await svc.updateProfile(shop, { waCallNumber: String(fd.get("waCallNumber") ?? ""), waCallInSms: fd.get("waCallInSms") === "on" });
+  if (r.error) return { error: r.error };
+  revalidatePath("/settings");
+  return { ok: await tr("Save হয়েছে") };
+}
 export async function saveBrandVoice(_: FormState, fd: FormData): Promise<FormState> {
   const { shop } = await requireShop();
   const r = await svc.updateProfile(shop, { brandVoice: String(fd.get("brandVoice") ?? "") });

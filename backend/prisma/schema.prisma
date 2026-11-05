@@ -60,6 +60,8 @@ model Shop {
   fbPageToken     String?
   fbPageName      String?
   fbPagesJson     String? // encrypted list of pages from the last Facebook connect
+  waCallNumber    String? // shop's WhatsApp number customers can call for free (digits, with country code)
+  waCallInSms     Boolean   @default(false) // add a "call us free on WhatsApp" link to SMS campaigns
 
   // Online store sync
   storeType     String? // shopify | woocommerce

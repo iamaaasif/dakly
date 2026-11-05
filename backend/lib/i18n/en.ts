@@ -537,4 +537,17 @@ export const en: Record<string, string> = {
   "Facebook Page Connect করুন (ইচ্ছা হলে)": "Connect your Facebook Page (optional)",
   "Online Store Connect করুন (ইচ্ছা হলে)": "Connect your online store (optional)",
   "Excel-এ নামান (CSV)": "Download (CSV)",
+  // WhatsApp free calls
+  "WhatsApp-এ ফ্রি কল": "Free calls on WhatsApp",
+  "চালু": "On",
+  "চালু নেই": "Off",
+  "Customer আপনার WhatsApp নম্বরে কল করলে কারও কোনো খরচ নেই। নম্বর দিন, তারপর Link বা বোতামটা Website আর SMS-এ দিন।": "When customers call your WhatsApp number, nobody pays. Add your number, then put the link or button on your website and in SMS.",
+  "আপনার WhatsApp নম্বর": "Your WhatsApp number",
+  "SMS Campaign-এর শেষে \"WhatsApp-এ ফ্রি কল\" Link দিন": "Add a \"Call free on WhatsApp\" link to SMS campaigns",
+  "Copy হয়েছে": "Copied",
+  "Copy করুন": "Copy",
+  "Code Copy করুন": "Copy code",
+  "Website-এর বোতাম (Shopify, WooCommerce বা যেকোনো Page-এ বসান)": "Website button (paste into Shopify, WooCommerce or any page)",
+  "WhatsApp-এ কল করুন": "Call us on WhatsApp",
+  "WhatsApp নম্বর ঠিক নেই": "The WhatsApp number is not valid",
 };

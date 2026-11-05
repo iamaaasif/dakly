@@ -26,7 +26,10 @@ Do these in order. Each step says where the key comes from. After each change: `
 ## 5. SMS (Bangladesh)
 - [ ] BulkSMSBD (or similar) account with an approved sender ID: `SMS_API_KEY`, `SMS_SENDER_ID`. Doctor shows the balance.
 
-## 6. Twilio (voice calls, SMS abroad) — optional
+## 5b. Bangladesh voice calls over IPCallBD — optional
+- [ ] Follow `deploy/asterisk/README.md`: ask IPCallBD the questions there, fill the `SIP_*` and `ASTERISK_*` lines in `.env`, start the `asterisk` service, check it says Registered, and make one test call to your own phone.
+
+## 6. Twilio (voice calls outside Bangladesh, SMS abroad) — optional
 - [ ] `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`; Voice geo permission for Bangladesh.
 - [ ] Number's "A message comes in" webhook: `https://APP_URL/api/webhooks/twilio-sms`.
 

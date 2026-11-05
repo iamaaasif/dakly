@@ -1,6 +1,7 @@
 import { apiAuth, ok, fail, locale } from "@/lib/api";
 import { channelConfig } from "@/lib/config";
 import { updateProfile } from "@/lib/services";
+import { waCallLink } from "@/lib/wacall";
 import { encrypt } from "@/lib/crypto";
 import { db } from "@/lib/db";
 import { COUNTRIES, LANGS, CURRENCIES } from "@/lib/i18n";
@@ -15,6 +16,7 @@ export async function GET() {
   const st = (c: { own: boolean } | null) => (c ? (c.own ? "own" : "platform") : "off");
   return ok({
     profile: { name: s.name, ...locale(s), brandVoice: s.brandVoice },
+    whatsappCall: { number: s.waCallNumber, inSms: s.waCallInSms, link: s.waCallNumber ? waCallLink(s.waCallNumber) : null },
     channels: {
       state: { wa: st(cfg.wa), sms: st(cfg.sms), voice: st(cfg.voice) }, smsProvider: cfg.sms?.kind ?? null,
       values: Object.fromEntries(PLAIN.map((k) => [k, s[k] ?? ""])),
@@ -27,7 +29,7 @@ export async function GET() {
 }
 
 /**
- * Any of: name, country, currency, timezone, language, brandVoice,
+ * Any of: name, country, currency, timezone, language, brandVoice, waCallNumber, waCallInSms,
  * waPhoneNumberId, waAccessToken, waTemplateName, waTemplateLang, smsApiUrl, smsApiKey, smsSenderId,
  * twilioSid, twilioToken, twilioFrom, clearChannels: true. Secrets: send a value to set, omit to keep.
  */
@@ -35,7 +37,8 @@ export async function PATCH(req: Request) {
   const a = await apiAuth();
   if ("res" in a) return a.res;
   const b = await req.json().catch(() => ({})) as Record<string, unknown>;
-  const pr = await updateProfile(a.shop, { name: b.name, country: b.country, currency: b.currency, timezone: b.timezone, language: b.language, brandVoice: b.brandVoice });
+  const pr = await updateProfile(a.shop, { name: b.name, country: b.country, currency: b.currency, timezone: b.timezone, language: b.language, brandVoice: b.brandVoice,
+    waCallNumber: typeof b.waCallNumber === "string" || b.waCallNumber === null ? b.waCallNumber : undefined, waCallInSms: typeof b.waCallInSms === "boolean" ? b.waCallInSms : undefined });
   if (pr.error) return fail(pr.error);
   const data: Record<string, string | null> = {};
   for (const k of PLAIN) if (typeof b[k] === "string") data[k] = (b[k] as string).trim() || null;

@@ -4,3 +4,7 @@ node_modules
 .env.local
 *.tsbuildinfo
 next-env.d.ts
+
+# Voice test recordings
+test/results/voice-rec/
+test/results/voice-results.json
