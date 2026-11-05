@@ -214,7 +214,7 @@ private fun CountryPicker(value: String, onChange: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
             shape = MaterialTheme.shapes.medium,
         )
-        androidx.compose.material3.ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             signupCountries.forEach { c ->
                 DropdownMenuItem(text = { Text(label(c)) }, onClick = { onChange(c); open = false })
             }
