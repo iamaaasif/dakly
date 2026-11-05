@@ -189,7 +189,7 @@ fun PostsScreen(nav: NavHostController) {
     }
 
     if (pickDate) {
-        val state = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+        val state = rememberDatePickerState(initialSelectedDateMillis = Format.pickerDay(Format.parseInstant(at)))
         DatePickerDialog(
             onDismissRequest = { pickDate = false },
             confirmButton = { TextButton(onClick = { pickDate = false; state.selectedDateMillis?.let { pickTime = Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() } }) { Text(stringResource(R.string.next)) } },
@@ -249,7 +249,8 @@ fun KnowledgeScreen(nav: NavHostController) {
     val data = rememberLoad(debounced, type) { repo.knowledge(debounced.ifBlank { null }, type) }
     var voice by rememberSaveable { mutableStateOf<String?>(null) }
     var savingVoice by remember { mutableStateOf(false) }
-    LaunchedEffect(data.data()?.brandVoice) { if (voice == null) voice = data.data()?.brandVoice.orEmpty() }
+    val loadedKb = data.data()
+    LaunchedEffect(loadedKb) { if (voice == null && loadedKb != null) voice = loadedKb.brandVoice.orEmpty() }
 
     ScreenFrame(
         stringResource(R.string.kb_title), subtitle = stringResource(R.string.kb_subtitle), onBack = { nav.popBackStack() },

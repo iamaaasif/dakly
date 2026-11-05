@@ -21,6 +21,9 @@ class SessionStore(private val context: Context) {
 
     suspend fun current(): String? = cached ?: token.first().also { cached = it }
 
+    /** The token in memory (set by [current]/[save]); no disk read, safe from any thread. */
+    fun peek(): String? = cached
+
     suspend fun save(token: String) {
         cached = token
         context.dataStore.edit { it[tokenKey] = token }

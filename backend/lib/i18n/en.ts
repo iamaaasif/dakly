@@ -537,4 +537,5 @@ export const en: Record<string, string> = {
   "Facebook Page Connect করুন (ইচ্ছা হলে)": "Connect your Facebook Page (optional)",
   "Online Store Connect করুন (ইচ্ছা হলে)": "Connect your online store (optional)",
   "Excel-এ নামান (CSV)": "Download (CSV)",
+  "আপনার দোকানের জনপ্রিয় পণ্য (একজন কিনেছেন), উনি এখনো নেননি": "Popular in your shop (1 person bought it), they have not bought it yet",
 };

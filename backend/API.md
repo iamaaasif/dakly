@@ -32,7 +32,7 @@ JSON API for the Dakly Android app. Base URL: `https://APP_URL/api/v1`.
 - `GET /me` adds `onboarding: { done, progress, total, steps: [{ key, label, done, href, required }] }`. Show the checklist on Home until `done`.
 - New: `POST /auth/reset`, `POST /auth/password`, `GET /customers/export`. `POST /auth/logout` now revokes the token.
 - Tokens are revoked after a password change or reset, logout, or when an admin disables the login: on any `401`, send the user to the login screen.
-- New error code `rate_limited` (429, with `Retry-After`): about 120 API calls per minute per account; sign-up and forgot-password per IP.
+- New error code `rate_limited` (429, with `Retry-After`): about 120 API calls per minute per account; sign-up and forgot-password per IP. For local app test runs set `API_RATE_LIMIT_PER_MIN` (e.g. 2000) on the server; leave it unset in production.
 - AI limit errors are `429 limit_reached` (were 400). Adding an order for an unknown customer is `404`.
 - `messagesLeft` in `/campaigns/audience` is always a number. An admin limit of 0 now means "no messages" (it used to mean unlimited).
 - `GET /billing` payments carry `invoiceUrl`.

@@ -51,7 +51,12 @@ fun <T> rememberLoad(vararg keys: Any?, block: suspend () -> T): Loader<T> {
     return remember(state) { Loader(state) { tick++ } }
 }
 
-fun Context.toast(text: String) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+/** Safe from any thread: toasts always show on the main thread. */
+fun Context.toast(text: String) {
+    val show = { Toast.makeText(applicationContext, text, Toast.LENGTH_LONG).show() }
+    if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) show()
+    else android.os.Handler(android.os.Looper.getMainLooper()).post(show)
+}
 
 fun Context.errorMessage(e: Throwable): String = when (e) {
     is OfflineException -> getString(R.string.offline_body)

@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -96,8 +97,27 @@ fun DaklyRoot(pendingPath: String?, onPathHandled: () -> Unit) {
         }
     }
 
+    // Password reset link (https://app.dakly.com.bd/reset?token=… or dakly://open?path=/reset?token=…) works logged in or out.
+    var resetToken by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(pendingPath) {
+        val p = pendingPath ?: return@LaunchedEffect
+        if (p == "/reset" || p.startsWith("/reset?") || p.startsWith("/reset/")) {
+            resetToken = Uri.parse("https://x$p").getQueryParameter("token").orEmpty()
+            onPathHandled()
+        }
+    }
+
     LaunchedEffect(Unit) { check() }
     LaunchedEffect(Unit) { repo.loggedOut.collect { gate = Gate.LoggedOut } }
+
+    resetToken?.let { token ->
+        bd.com.dakly.app.ui.screens.ResetPasswordScreen(
+            token = token,
+            onDone = { resetToken = null; scope.launch { gate = Gate.Checking; check() } },
+            onCancel = { resetToken = null },
+        )
+        return
+    }
 
     when (gate) {
         Gate.Checking -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -132,6 +152,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val BILLING = "billing"
     const val SUPPORT = "support"
+    const val PASSWORD = "password"
 
     fun customer(id: String) = "customer/$id"
     fun chat(id: String) = "chat/$id"
@@ -162,6 +183,7 @@ object Routes {
             seg[0] == "settings" -> SETTINGS
             seg[0] == "billing" -> BILLING
             seg[0] == "support" -> SUPPORT
+            seg[0] == "password" -> PASSWORD
             else -> HOME
         }
     }
@@ -221,7 +243,7 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
                                     }
                                 } else Icon(t.icon, null)
                             },
-                            label = { Text(stringResource(t.label), maxLines = 1) },
+                            label = { Text(stringResource(t.label), maxLines = 1, softWrap = false, fontSize = 11.sp, overflow = androidx.compose.ui.text.style.TextOverflow.Visible) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = Dakly.colors.dak, selectedTextColor = Dakly.colors.dak,
                                 indicatorColor = Dakly.colors.dakSoft,
@@ -280,6 +302,7 @@ private fun MainApp(pendingPath: String?, onPathHandled: () -> Unit, onLoggedOut
             composable(Routes.SETTINGS) { SettingsScreen(nav, onLoggedOut) }
             composable(Routes.BILLING) { BillingScreen(nav) }
             composable(Routes.SUPPORT) { SupportScreen(nav) }
+            composable(Routes.PASSWORD) { bd.com.dakly.app.ui.screens.ChangePasswordScreen(nav) }
         }
     }
 }

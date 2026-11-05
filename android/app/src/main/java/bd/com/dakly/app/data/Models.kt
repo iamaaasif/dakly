@@ -35,7 +35,14 @@ import kotlinx.serialization.Serializable
     val whatsapp: Boolean = false, val sms: String? = null, val voice: Boolean = false,
     val facebookPage: String? = null, val store: String? = null,
 )
-@Serializable data class Me(val user: User = User(), val shop: ShopLocale = ShopLocale(), val plan: Plan? = null, val channels: Channels = Channels())
+@Serializable data class OnboardingStep(val key: String = "", val label: String = "", val done: Boolean = false, val href: String = "/", val required: Boolean = true)
+@Serializable data class Onboarding(val done: Boolean = true, val progress: Int = 0, val total: Int = 0, val steps: List<OnboardingStep> = emptyList())
+@Serializable data class Me(
+    val user: User = User(), val shop: ShopLocale = ShopLocale(), val plan: Plan? = null, val channels: Channels = Channels(),
+    val onboarding: Onboarding? = null,
+)
+@Serializable data class ResetBody(val token: String, val password: String)
+@Serializable data class ChangePasswordBody(val current: String, val password: String)
 @Serializable data class MePatch(val name: String? = null, val uiLang: String? = null)
 @Serializable data class ShopStatus(val status: String = "active", val reason: String? = null)
 
@@ -232,7 +239,12 @@ import kotlinx.serialization.Serializable
 )
 @Serializable data class Billing(
     val current: String? = null, val until: String? = null, val plans: List<BillingPlan> = emptyList(),
-    val onlinePayments: Boolean = false, val provider: String? = null,
+    val onlinePayments: Boolean = false, val provider: String? = null, val payments: List<Payment> = emptyList(),
+)
+@Serializable data class Payment(
+    val id: String = "", val plan: String = "", val months: Int = 1, val amount: Long = 0, val currency: String = "BDT",
+    val provider: String? = null, val status: String = "pending", val createdAt: String? = null, val paidAt: String? = null,
+    val invoiceUrl: String? = null,
 )
 @Serializable data class CheckoutBody(val plan: String, val months: Int)
 @Serializable data class UrlResponse(val url: String = "")

@@ -296,7 +296,7 @@ fun CampaignWizardScreen(nav: NavHostController, initialSegment: String?, initia
     }
 
     if (pickDate) {
-        val initial = Format.parseInstant(sendAt)?.toEpochMilli() ?: System.currentTimeMillis()
+        val initial = Format.pickerDay(Format.parseInstant(sendAt))
         val state = rememberDatePickerState(initialSelectedDateMillis = initial)
         DatePickerDialog(
             onDismissRequest = { pickDate = false },
