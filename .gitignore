@@ -1,0 +1,32 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+keystore.properties
+passwords.txt
+*.passwords
+secrets/
+
+# Node / Next.js
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+backend/backups/
+
+# Android / Gradle
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+*.apk
+*.aab
+
+# OS
+.DS_Store

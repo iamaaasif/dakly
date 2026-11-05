@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Dakly</string>
+    <string name="offline_title">No internet connection</string>
+    <string name="offline_body">Check that mobile data or Wi-Fi is on, then try again.</string>
+    <string name="error_title">Can\'t open Dakly</string>
+    <string name="error_body">The server is having trouble. Please try again in a moment.</string>
+    <string name="retry">Try again</string>
+    <string name="mic_denied">Dakly needs microphone access to add customers by voice.</string>
+    <string name="no_app">No app found to open this link.</string>
+    <string name="press_back_again">Press back again to exit</string>
+    <string name="download_started">Download started</string>
+    <string name="choose_file">Choose a file</string>
+</resources>

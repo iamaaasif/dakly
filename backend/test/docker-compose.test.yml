@@ -1,0 +1,52 @@
+# Test stack: the real app and database, with every outside provider replaced by test/mock/server.mjs.
+#   docker compose -f docker-compose.yml -f test/docker-compose.test.yml up -d --build
+# The provider hostnames below resolve to the mock inside the Docker network, so the app calls its
+# normal production URLs and nothing leaves the machine.
+services:
+  mock:
+    image: node:22-bookworm-slim
+    command: ["node", "/mock/server.mjs"]
+    volumes: ["./test/mock:/mock:ro"]
+    environment: { CERT_DIR: /mock/certs/ }
+    ports: ["9090:8080"]
+    networks:
+      default:
+        aliases: [api.openai.com, graph.facebook.com, www.facebook.com, api.twilio.com, bulksmsbd.net, sandbox.sslcommerz.com, securepay.sslcommerz.com, api.stripe.com, checkout.stripe.com, teststore.myshopify.com, woo.dakly-test.com, smtp.dakly-test.com]
+  app:
+    depends_on:
+      mock: { condition: service_started }
+    volumes: ["./test/mock/certs/ca.crt:/etc/dakly-test-ca.crt:ro"]
+    environment:
+      NODE_EXTRA_CA_CERTS: /etc/dakly-test-ca.crt
+      APP_URL: http://localhost:3000
+      AUTH_SECRET: test-auth-secret-0123456789abcdef0123456789abcdef
+      ENCRYPTION_KEY: test-encryption-key-0123456789abcdef0123456789abcdef
+      OPENAI_API_KEY: sk-test-mock
+      WA_PHONE_NUMBER_ID: "109876543210"
+      WA_ACCESS_TOKEN: EAATESTTOKEN
+      WA_TEMPLATE_NAME: dakly_offer
+      WA_TEMPLATE_LANG: bn
+      WA_VERIFY_TOKEN: verify-me
+      WA_APP_SECRET: wa-app-secret-test
+      SMS_API_URL: https://bulksmsbd.net/api/smsapi
+      SMS_API_KEY: bulk-test-key
+      SMS_SENDER_ID: "8809612345678"
+      TWILIO_ACCOUNT_SID: AC0123456789abcdef0123456789abcdef
+      TWILIO_AUTH_TOKEN: twilio-test-token
+      TWILIO_FROM: "+15005550006"
+      FB_APP_ID: "4242424242"
+      FB_APP_SECRET: fb-test-secret
+      SSLCZ_STORE_ID: testbox
+      SSLCZ_STORE_PASSWORD: qwerty
+      SSLCZ_SANDBOX: "true"
+      STRIPE_SECRET_KEY: sk_test_mock
+      STRIPE_WEBHOOK_SECRET: whsec_testsecret
+      SMTP_HOST: smtp.dakly-test.com
+      SMTP_PORT: "587"
+      SMTP_USER: ""
+      MAIL_FROM: Dakly <no-reply@dakly.test>
+      ADMIN_EMAILS: owner@dakly.test
+      SIGNUP_APPROVAL: auto
+      RUN_SCHEDULER: "false"
+      CRON_SECRET: cron-test-secret
+      SHOPIFY_API_VERSION: "2026-07"

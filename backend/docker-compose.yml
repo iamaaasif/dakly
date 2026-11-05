@@ -1,0 +1,60 @@
+# Dakly. First time: ./setup.sh (creates .env with random secrets), fill in your keys, then:
+#   docker compose up -d --build
+# Services: db (Postgres), app (Dakly), web (Caddy: free HTTPS for the domain in APP_URL), backup (daily database dump to ./backups)
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dakly
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dakly}
+      POSTGRES_DB: dakly
+    volumes: [dbdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dakly"]
+      interval: 5s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://dakly:${POSTGRES_PASSWORD:-dakly}@db:5432/dakly
+    # Reachable only from this machine; the public reaches Dakly through Caddy on ports 80/443
+    ports: ["127.0.0.1:${APP_PORT:-3000}:3000"]
+    depends_on:
+      db: { condition: service_healthy }
+    logging: { driver: json-file, options: { max-size: "20m", max-file: "5" } }
+
+  web:
+    image: caddy:2
+    restart: unless-stopped
+    # Site address = the host of APP_URL (https://app.example.com -> app.example.com, with automatic HTTPS).
+    # An http:// APP_URL (local trial) is served as plain http on port 80.
+    entrypoint: ["/bin/sh", "-c", "export SITE_ADDRESS=$$(echo \"$$APP_URL\" | sed -E 's#^https://([^/:]+).*#\\1#; s#^http://.*#:80#'); echo \"[web] serving $$SITE_ADDRESS\"; exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"]
+    environment:
+      APP_URL: ${APP_URL:-http://localhost}
+    ports: ["80:80", "443:443"]
+    volumes: ["./deploy/Caddyfile:/etc/caddy/Caddyfile:ro", "caddydata:/data", "caddyconfig:/config"]
+    depends_on: [app]
+
+  backup:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: dakly
+      PGPASSWORD: ${POSTGRES_PASSWORD:-dakly}
+      PGDATABASE: dakly
+      KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      EVERY_HOURS: ${BACKUP_EVERY_HOURS:-24}
+    volumes: ["./backups:/backups", "./deploy/backup.sh:/backup.sh:ro"]
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    depends_on:
+      db: { condition: service_healthy }
+
+volumes:
+  dbdata:
+  caddydata:
+  caddyconfig:

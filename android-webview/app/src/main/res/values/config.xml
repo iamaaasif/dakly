@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The only place to change the server address. Also update the host in AndroidManifest.xml (App Links). -->
+<resources>
+    <string name="app_url" translatable="false">https://app.dakly.com.bd/</string>
+    <string name="app_host" translatable="false">app.dakly.com.bd</string>
+</resources>

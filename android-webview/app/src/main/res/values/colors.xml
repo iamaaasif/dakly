@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="paper">#F3F5F2</color>
+    <color name="ink">#13261D</color>
+    <color name="ink_2">#4B5D53</color>
+    <color name="dak">#C8402A</color>
+    <color name="dak_ink">#FFFFFF</color>
+    <color name="icon_bg">#C8402A</color>
+</resources>

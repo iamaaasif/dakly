@@ -1,0 +1,343 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("merchant") // merchant | admin | support | billing
+  uiLang       String? // panel language chosen by the user (bn | en); null = shop language
+  disabled     Boolean  @default(false)
+  tokenVersion Int      @default(0) // bumped on password change/reset or disable: signs out every device
+  lastLoginAt  DateTime?
+  tickets      TicketMessage[]
+  shop         Shop?
+  resets       PasswordReset[]
+  createdAt    DateTime @default(now())
+}
+
+model Shop {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String   @unique
+  knowledge KnowledgeItem[]
+  chats     ChatMessage[]
+  brandVoice String? // how the shop talks: tone, greetings, words to use or avoid
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  country  String @default("BD") // ISO 3166 alpha-2; phone numbers without a country code are read in this country
+  currency String @default("BDT") // ISO 4217; order amounts are whole units of this currency
+  timezone String @default("Asia/Dhaka") // IANA zone for schedules, reports and daily tips
+  language String @default("bn") // language of AI text sent to customers (and default panel language)
+
+  plan            String    @default("free") // free | starter | growth
+  planUntil       DateTime?
+  limitOverride   Int? // monthly message limit set by an admin
+  approved        Boolean   @default(true)
+  suspended       Boolean   @default(false)
+  suspendedReason String?
+
+  // Channel settings (each optional; a channel without settings runs in test mode)
+  waPhoneNumberId String?
+  waAccessToken   String?
+  waTemplateName  String?
+  waTemplateLang  String?  @default("bn")
+  smsApiUrl       String?
+  smsApiKey       String?
+  smsSenderId     String?
+  twilioSid       String?
+  twilioToken     String?
+  twilioFrom      String?
+  fbPageId        String?
+  fbPageToken     String?
+  fbPageName      String?
+  fbPagesJson     String? // encrypted list of pages from the last Facebook connect
+
+  // Online store sync
+  storeType     String? // shopify | woocommerce
+  storeUrl      String?
+  storeKey      String?
+  storeSecret   String?
+  storeSyncedAt DateTime?
+  storeError    String?
+
+  customers     Customer[]
+  campaigns     Campaign[]
+  posts         Post[]
+  dismissed     DismissedInsight[]
+  payments      Payment[]
+  aiUsage       AiUsage[]
+  suggestions   AiSuggestion[]
+  ticketList    Ticket[]
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String
+  email     String?
+  area      String?
+  note      String?
+  source    String   @default("manual") // manual | excel | voice | shopify | woocommerce
+  optedOut  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  lastInboundAt DateTime? // last WhatsApp message from the customer; free-form replies are allowed for 24h after it
+
+  orders   Order[]
+  messages CampaignMessage[]
+  chat     ChatMessage[]
+
+  @@unique([shopId, phone])
+  @@index([shopId])
+}
+
+model Order {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  amount     Int // whole taka
+  items      String?
+  orderedAt  DateTime @default(now())
+  externalId String? // e.g. "shopify:123" for synced orders
+
+  @@unique([customerId, externalId])
+  @@index([customerId])
+}
+
+model Campaign {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name      String
+  segment   String // vip | regular | new | inactive | all
+  message   String
+  channels  String[] // wa | sms | voice
+  status    String   @default("draft") // draft | scheduled | sending | sent
+  sendAt    DateTime?
+  sentAt    DateTime?
+  createdAt DateTime @default(now())
+
+  messages CampaignMessage[]
+}
+
+model CampaignMessage {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  channel     String
+  status      String   @default("queued") // queued | sent | delivered | read | failed | test | interested
+  providerId  String?
+  error       String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([providerId])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  shopId      String
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  prompt      String
+  text        String
+  status      String    @default("draft") // draft | scheduled | published | failed
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  fbPostId    String?
+  error       String?
+  createdAt   DateTime  @default(now())
+}
+
+model DismissedInsight {
+  id     String   @id @default(cuid())
+  shopId String
+  shop   Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  key    String
+  until  DateTime
+
+  @@unique([shopId, key])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
+model Payment {
+  id        String    @id @default(cuid())
+  shopId    String
+  shop      Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  plan      String
+  months    Int       @default(1)
+  amount    Int // whole units of currency
+  currency  String    @default("BDT")
+  provider  String    @default("sslcommerz") // sslcommerz | stripe | manual
+  tranId    String    @unique
+  status    String    @default("pending") // pending | paid | failed | cancelled | manual
+  valId     String?
+  method    String?
+  note      String?
+  createdAt DateTime  @default(now())
+  paidAt    DateTime?
+
+  @@index([shopId])
+}
+
+model AiUsage {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  kind      String // message | post | voice | tts | insight
+  createdAt DateTime @default(now())
+
+  @@index([shopId, createdAt])
+}
+
+model AiSuggestion {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  day       String // YYYY-MM-DD in Asia/Dhaka
+  items     Json
+  source    String   @default("ai") // ai | rules
+  createdAt DateTime @default(now())
+
+  @@unique([shopId, day])
+}
+
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+}
+
+model Ticket {
+  id        String          @id @default(cuid())
+  shopId    String
+  shop      Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  subject   String
+  status    String          @default("open") // open | waiting | closed
+  priority  String          @default("normal") // normal | high
+  assignee  String? // staff user id
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  messages  TicketMessage[]
+
+  @@index([status])
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  fromStaff Boolean  @default(false)
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Announcement {
+  id        String    @id @default(cuid())
+  title     String
+  body      String
+  tone      String    @default("info") // info | warning
+  audience  String    @default("all") // all | free | paid
+  active    Boolean   @default(true)
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     String // email at the time
+  action    String
+  target    String?
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model ErrorLog {
+  id        String   @id @default(cuid())
+  source    String // scheduler | whatsapp | sms | voice | facebook | store | ai | payment | app
+  message   String
+  shopId    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model SystemState {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+/// Facts the shop owner teaches Dakly AI: products, prices, policies, FAQs, brand voice.
+/// Every AI feature (messages, posts, call scripts, inbox replies, daily tips) reads the active items.
+model KnowledgeItem {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  type      String   @default("note") // product | policy | faq | voice | note
+  title     String
+  body      String   @default("")
+  price     Int? // whole units of the shop currency, for products
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shopId, active])
+}
+
+/// One-to-one conversation with a customer (WhatsApp inbox, plus SMS and call log).
+model ChatMessage {
+  id         String    @id @default(cuid())
+  shopId     String
+  shop       Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  direction  String // in | out
+  channel    String    @default("wa") // wa | sms | call
+  kind       String    @default("text") // text | template | campaign | audio | image | call | note
+  body       String
+  status     String    @default("sent") // received | sending | sent | delivered | read | failed | test
+  providerId String?
+  error      String?
+  readAt     DateTime? // for inbound: when the shop opened it
+  createdAt  DateTime  @default(now())
+  authorId   String? // staff user who sent it (null = system / campaign / AI)
+
+  @@index([shopId, customerId, createdAt])
+  @@index([providerId])
+}
+
+/// Signed-out tokens (logout). Kept until the token would have expired anyway.
+model RevokedToken {
+  jti       String   @id
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}

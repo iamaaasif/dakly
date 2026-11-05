@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="offline_title">ইন্টারনেট সংযোগ নেই</string>
+    <string name="offline_body">মোবাইল ডেটা বা Wi-Fi চালু আছে কিনা দেখে আবার চেষ্টা করুন।</string>
+    <string name="error_title">Dakly খুলতে পারছি না</string>
+    <string name="error_body">সার্ভারে সমস্যা হচ্ছে। একটু পরে আবার চেষ্টা করুন।</string>
+    <string name="retry">আবার চেষ্টা করুন</string>
+    <string name="mic_denied">Voice দিয়ে Customer যোগ করতে Microphone-এর অনুমতি দরকার।</string>
+    <string name="no_app">এই লিংক খোলার মতো কোনো App পাওয়া যায়নি।</string>
+    <string name="press_back_again">বের হতে আবার Back চাপুন</string>
+    <string name="download_started">Download শুরু হয়েছে</string>
+    <string name="choose_file">ফাইল বাছুন</string>
+</resources>

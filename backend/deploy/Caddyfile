@@ -1,0 +1,13 @@
+# HTTPS in front of Dakly. The site address comes from APP_URL (see docker-compose.yml):
+# a real domain gets a free Let's Encrypt certificate automatically; an http:// APP_URL is served as plain :80.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	request_body {
+		max_size 20MB
+	}
+	reverse_proxy app:3000
+	log {
+		output stdout
+		format console
+	}
+}
