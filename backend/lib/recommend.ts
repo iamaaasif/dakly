@@ -53,7 +53,7 @@ export async function recommendationFor(shopId: string, customerId: string, { t 
   const { ranked, bought } = await productStats(shopId);
   const mine = bought.get(customerId) ?? new Set();
   const fresh = ranked.find((r) => !mine.has(r.key));
-  if (fresh) return { product: fresh.name, reason: t("আপনার দোকানের জনপ্রিয় পণ্য ({n} জন কিনেছেন), উনি এখনো নেননি", { n: fresh.buyers }) };
+  if (fresh) return { product: fresh.name, reason: fresh.buyers === 1 ? t("আপনার দোকানের জনপ্রিয় পণ্য (একজন কিনেছেন), উনি এখনো নেননি") : t("আপনার দোকানের জনপ্রিয় পণ্য ({n} জন কিনেছেন), উনি এখনো নেননি", { n: fresh.buyers }) };
   const fav = ranked.find((r) => mine.has(r.key));
   return fav ? { product: fav.name, reason: t("উনি এটা আগে কিনেছেন, আবার নিতে পারেন") } : null;
 }

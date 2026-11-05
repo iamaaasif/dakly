@@ -33,10 +33,10 @@ import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -80,6 +80,7 @@ import bd.com.dakly.app.data.StoreBody
 import bd.com.dakly.app.data.Tip
 import bd.com.dakly.app.ui.LocalRepo
 import bd.com.dakly.app.ui.Routes
+import bd.com.dakly.app.ui.errorMessage
 import bd.com.dakly.app.ui.components.Avatar
 import bd.com.dakly.app.ui.components.Banner
 import bd.com.dakly.app.ui.components.ChoiceChips
@@ -314,6 +315,18 @@ fun SettingsScreen(nav: NavHostController, onLoggedOut: () -> Unit) {
                     item { FacebookCard(fb.data(), onChanged = { fb.reload() }) }
                     item { StoreCard(s) { data.reload() } }
                     item { ChannelsCard(s) { data.reload() } }
+                    item {
+                        DCard(onClick = { nav.navigate(Routes.PASSWORD) }) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Outlined.Lock, null, tint = Dakly.colors.ink2)
+                                Spacer(Modifier.width(12.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(stringResource(R.string.password_title), fontWeight = FontWeight.SemiBold)
+                                    Text(me?.user?.email.orEmpty(), color = Dakly.colors.ink3, fontSize = 12.5.sp)
+                                }
+                            }
+                        }
+                    }
                     item { DeleteAccountCard(onDeleted = onLoggedOut) }
                 }
             }
@@ -471,7 +484,7 @@ private fun StoreCard(s: Settings, onChanged: () -> Unit) {
             }
             if (s.store.type != null) {
                 Text((if (s.store.type == "shopify") "Shopify" else "WooCommerce") + " · " + s.store.url.orEmpty(), color = Dakly.colors.ink2)
-                s.store.syncedAt?.let { Text(stringResource(R.string.settings_store_synced, Format.relative(it)), color = Dakly.colors.ink3, fontSize = 12.5.sp) }
+                s.store.syncedAt?.let { Text(stringResource(R.string.settings_store_synced, Format.relative(ctx, it)), color = Dakly.colors.ink3, fontSize = 12.5.sp) }
                 s.store.error?.let { Text(it, color = Dakly.colors.dak, fontSize = 12.5.sp) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SecondaryButton(stringResource(R.string.settings_sync_now), Modifier.weight(1f), enabled = !busy) {
@@ -680,6 +693,12 @@ fun BillingScreen(nav: NavHostController) {
                             }
                         }
                     }
+                    if (b.payments.isNotEmpty()) {
+                        item { SectionTitle(stringResource(R.string.billing_payments)) }
+                        items(b.payments, key = { "pay-" + it.id }) { pay ->
+                            PaymentRow(pay, pay.invoiceUrl?.let { u -> { Web.open(ctx, if (u.startsWith("http")) u else repo.baseUrl + u) } })
+                        }
+                    }
                 }
             }
         }
@@ -729,13 +748,70 @@ fun SupportScreen(nav: NavHostController) {
                         t.messages.forEach { m ->
                             HorizontalDivider(color = Dakly.colors.line)
                             Text(
-                                stringResource(if (m.fromStaff) R.string.support_from_team else R.string.inbox_you) + " · " + Format.relative(m.createdAt),
+                                stringResource(if (m.fromStaff) R.string.support_from_team else R.string.inbox_you) + " · " + Format.relative(ctx, m.createdAt),
                                 color = if (m.fromStaff) Dakly.colors.leaf else Dakly.colors.ink3, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                             )
                             Text(m.body, color = Dakly.colors.ink2)
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/** Change password; the server signs out every other device and returns a new token for this one. */
+@Composable
+fun ChangePasswordScreen(nav: NavHostController) {
+    val repo = LocalRepo.current
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var current by rememberSaveable { mutableStateOf("") }
+    var next by rememberSaveable { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    ScreenFrame(stringResource(R.string.password_title), subtitle = stringResource(R.string.password_subtitle), onBack = { nav.popBackStack() }) { inner ->
+        Column(Modifier.padding(inner).imePadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Field(current, { current = it }, stringResource(R.string.password_current), password = true,
+                keyboard = KeyboardOptions(keyboardType = KeyboardType.Password))
+            Field(next, { next = it }, stringResource(R.string.password_new), password = true,
+                keyboard = KeyboardOptions(keyboardType = KeyboardType.Password), supporting = stringResource(R.string.auth_password_hint))
+            if (error != null) Text(error!!, color = Dakly.colors.dak)
+            PrimaryButton(stringResource(R.string.password_save), Modifier.fillMaxWidth(), enabled = current.isNotBlank() && next.length >= 8, loading = busy) {
+                busy = true; error = null
+                scope.launch {
+                    try {
+                        repo.changePassword(current, next)
+                        ctx.toast(ctx.getString(R.string.password_done))
+                        nav.popBackStack()
+                    } catch (e: Exception) { error = ctx.errorMessage(e) } finally { busy = false }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PaymentRow(p: bd.com.dakly.app.data.Payment, onInvoice: (() -> Unit)?) {
+    val ctx = LocalContext.current
+    DCard(onClick = onInvoice, padding = 14.dp) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    p.plan.replaceFirstChar { it.titlecase() } + " · " + ctx.resources.getQuantityString(R.plurals.months, p.months, Format.number(ctx, p.months)),
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(Format.date(ctx, p.paidAt ?: p.createdAt) + " · " + Format.money(ctx, p.amount.toDouble(), p.currency), color = Dakly.colors.ink2, fontSize = 13.sp)
+            }
+            val (label, colors) = when (p.status) {
+                "paid" -> R.string.billing_status_paid to (Dakly.colors.leaf to Dakly.colors.leafSoft)
+                "failed", "cancelled" -> R.string.billing_status_failed to (Dakly.colors.dak to Dakly.colors.dakSoft)
+                else -> R.string.billing_status_pending to (Dakly.colors.haldi to Dakly.colors.haldiSoft)
+            }
+            Pill(stringResource(label), colors.first, colors.second)
+            if (onInvoice != null) {
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.billing_invoice), color = Dakly.colors.dak, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
             }
         }
     }

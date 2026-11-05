@@ -373,4 +373,28 @@
         <item quantity="one">%1$s মাস</item>
         <item quantity="other">%1$s মাস</item>
     </plurals>
+    <string name="reset_title">নতুন পাসওয়ার্ড দিন</string>
+    <string name="reset_body">আপনার Dakly অ্যাকাউন্টের জন্য নতুন পাসওয়ার্ড বেছে নিন।</string>
+    <string name="reset_new">নতুন পাসওয়ার্ড</string>
+    <string name="reset_save">সেভ করে লগইন করুন</string>
+    <string name="reset_done">পাসওয়ার্ড বদলেছে। আপনি লগইন করেছেন।</string>
+    <string name="reset_back">লগইনে ফিরে যান</string>
+    <string name="password_title">পাসওয়ার্ড বদলান</string>
+    <string name="password_subtitle">অন্য ফোন ও কম্পিউটার থেকে লগআউট হয়ে যাবে</string>
+    <string name="password_current">বর্তমান পাসওয়ার্ড</string>
+    <string name="password_new">নতুন পাসওয়ার্ড</string>
+    <string name="password_save">পাসওয়ার্ড বদলান</string>
+    <string name="password_done">পাসওয়ার্ড বদলেছে। অন্য ডিভাইস থেকে লগআউট হয়েছে।</string>
+    <string name="export_customers">Customer লিস্ট এক্সপোর্ট (CSV)</string>
+    <string name="export_share">Customer লিস্ট শেয়ার করুন</string>
+    <string name="export_failed">Customer লিস্ট এক্সপোর্ট করা যায়নি।</string>
+    <string name="onboarding_title">শুরু করুন</string>
+    <string name="onboarding_progress">%2$s-এর মধ্যে %1$s টি হয়েছে</string>
+    <string name="onboarding_optional">ঐচ্ছিক</string>
+    <string name="billing_payments">Payment ও ইনভয়েস</string>
+    <string name="billing_invoice">ইনভয়েস</string>
+    <string name="billing_status_paid">পরিশোধিত</string>
+    <string name="billing_status_pending">অপেক্ষমাণ</string>
+    <string name="billing_status_failed">ব্যর্থ</string>
+    <string name="settings_security">লগইন ও নিরাপত্তা</string>
 </resources>

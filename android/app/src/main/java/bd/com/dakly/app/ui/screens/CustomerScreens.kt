@@ -32,6 +32,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -135,6 +136,7 @@ private val segmentFilters = listOf<String?>(null, "vip", "regular", "new", "ina
 
 @Composable
 fun CustomersScreen(nav: NavHostController) {
+    var exporting by remember { mutableStateOf(false) }
     val repo = LocalRepo.current
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -187,6 +189,17 @@ fun CustomersScreen(nav: NavHostController) {
         title = stringResource(R.string.customers_title),
         subtitle = stringResource(R.string.customers_total, Format.number(ctx, total)),
         actions = {
+            IconButton(onClick = {
+                if (!exporting) {
+                    exporting = true
+                    scope.launch {
+                        try {
+                            val f = repo.exportCustomers(java.io.File(ctx.cacheDir, "exports"))
+                            bd.com.dakly.app.util.Share.file(ctx, f, "text/csv", ctx.getString(R.string.export_share))
+                        } catch (e: Exception) { ctx.toastError(e) } finally { exporting = false }
+                    }
+                }
+            }) { Icon(Icons.Outlined.FileDownload, stringResource(R.string.export_customers)) }
             Box {
                 IconButton(onClick = { sortMenu = true }) { Icon(Icons.Outlined.Sort, stringResource(R.string.sort)) }
                 DropdownMenu(sortMenu, onDismissRequest = { sortMenu = false }) {
@@ -268,7 +281,7 @@ private fun CustomerRowCard(c: CustomerRow, onOpen: () -> Unit, onCall: () -> Un
                     }
                 }
                 Text(
-                    Format.phone(c.phone) + (c.stats.last?.let { " · " + ctx.getString(R.string.customers_last_bought, Format.relative(it)) } ?: ""),
+                    Format.phone(c.phone) + (c.stats.last?.let { " · " + ctx.getString(R.string.customers_last_bought, Format.relative(ctx, it)) } ?: ""),
                     color = Dakly.colors.ink3, fontSize = 12.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 )
                 Text(Format.money(ctx, c.stats.total.toDouble()) + " · " + ctx.resources.getQuantityString(R.plurals.orders_count, c.stats.count, Format.number(ctx, c.stats.count)),
@@ -396,7 +409,7 @@ private fun CustomerDetailContent(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 StatTile(Format.money(ctx, c.total.toDouble(), c.currency), stringResource(R.string.customer_total_spent), Modifier.weight(1f))
                 StatTile(Format.number(ctx, c.orders.size), stringResource(R.string.customer_orders), Modifier.weight(1f))
-                StatTile(c.orders.firstOrNull()?.orderedAt?.let { Format.relative(it) } ?: "–", stringResource(R.string.customer_last_order), Modifier.weight(1f))
+                StatTile(c.orders.firstOrNull()?.orderedAt?.let { Format.relative(ctx, it, narrow = true) } ?: "–", stringResource(R.string.customer_last_order), Modifier.weight(1f))
             }
         }
         c.recommendation?.let { r ->

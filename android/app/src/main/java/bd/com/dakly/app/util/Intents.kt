@@ -68,3 +68,13 @@ object Web {
         }
     }
 }
+
+/** Shares a file from the app cache (e.g. the exported customers CSV) with any app: Drive, Gmail, WhatsApp, Files. */
+object Share {
+    fun file(context: Context, file: java.io.File, mime: String, title: String) {
+        val uri = androidx.core.content.FileProvider.getUriForFile(context, context.packageName + ".files", file)
+        val send = Intent(Intent.ACTION_SEND).setType(mime).putExtra(Intent.EXTRA_STREAM, uri)
+            .putExtra(Intent.EXTRA_SUBJECT, file.name).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        Contact.start(context, Intent.createChooser(send, title))
+    }
+}

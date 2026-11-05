@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
@@ -77,7 +79,7 @@ import bd.com.dakly.app.util.Format
 fun HomeScreen(nav: NavHostController) {
     val repo = LocalRepo.current
     val me by repo.me.collectAsState()
-    val data = rememberLoad { repo.dashboard() }
+    val data = rememberLoad { repo.dashboard().also { runCatching { repo.loadMe() } } }
     val ctx = LocalContext.current
 
     Column(Modifier.fillMaxWidth()) {
@@ -104,14 +106,14 @@ fun HomeScreen(nav: NavHostController) {
 
         LoadContent(data.value, onRetry = data::reload) { d ->
             PullToRefreshBox(isRefreshing = (data.value as? Load.Ready)?.refreshing == true, onRefresh = data::reload) {
-                HomeContent(nav, d)
+                HomeContent(nav, d, me?.onboarding)
             }
         }
     }
 }
 
 @Composable
-private fun HomeContent(nav: NavHostController, d: Dashboard) {
+private fun HomeContent(nav: NavHostController, d: Dashboard, onboarding: bd.com.dakly.app.data.Onboarding? = null) {
     val ctx = LocalContext.current
     LazyColumn(contentPadding = ContentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
@@ -121,6 +123,8 @@ private fun HomeContent(nav: NavHostController, d: Dashboard) {
                 if (tips > 0) Text(stringResource(R.string.home_opportunities, Format.number(ctx, tips)), color = Dakly.colors.ink2)
             }
         }
+
+        if (onboarding != null && !onboarding.done && onboarding.steps.isNotEmpty()) item { OnboardingCard(nav, onboarding) }
 
         d.aiTips?.tips?.firstOrNull()?.let { tip -> item { TipHero(tip, onAct = { nav.navigate(Routes.newCampaign(tip.segment, tip.offer)) }, onLater = { nav.navigate(Routes.ALERTS) }) } }
 
@@ -243,15 +247,15 @@ private fun TipHero(tip: Tip, onAct: () -> Unit, onLater: () -> Unit) {
         Spacer(Modifier.height(14.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             androidx.compose.material3.Button(
-                onClick = onAct, shape = RoundedCornerShape(12.dp),
+                onClick = onAct, shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1f, fill = false),
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Dakly.colors.dak, contentColor = Dakly.colors.dakInk),
             ) {
                 Icon(Icons.Outlined.Campaign, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text(stringResource(R.string.home_create_campaign))
+                Text(stringResource(R.string.home_create_campaign), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
             OutlinedButton(onClick = onLater, shape = RoundedCornerShape(12.dp)) {
-                Text(stringResource(R.string.home_later), color = Dakly.colors.heroFg)
+                Text(stringResource(R.string.home_later), color = Dakly.colors.heroFg, maxLines = 1, softWrap = false)
             }
         }
     }
@@ -342,6 +346,43 @@ private fun QuickAction(icon: ImageVector, label: String, modifier: Modifier, on
             IconBubble(icon, Dakly.colors.dak, Dakly.colors.dakSoft)
             Spacer(Modifier.width(10.dp))
             Text(label, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, maxLines = 2)
+        }
+    }
+}
+
+/** First-run checklist from GET /me (customers, knowledge, channel, first campaign...), shown until done. */
+@Composable
+private fun OnboardingCard(nav: NavHostController, o: bd.com.dakly.app.data.Onboarding) {
+    val ctx = LocalContext.current
+    DCard {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.onboarding_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.onboarding_progress, Format.number(ctx, o.progress), Format.number(ctx, o.total)), color = Dakly.colors.ink2, fontSize = 13.sp)
+            }
+            androidx.compose.material3.LinearProgressIndicator(
+                progress = { if (o.total > 0) o.progress.toFloat() / o.total else 0f },
+                modifier = Modifier.fillMaxWidth(), color = Dakly.colors.leaf, trackColor = Dakly.colors.sunk,
+            )
+            o.steps.forEach { s ->
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+                        .clickable(enabled = !s.done) { nav.navigate(Routes.fromWebPath(s.href)) }
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        if (s.done) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked, null,
+                        tint = if (s.done) Dakly.colors.leaf else Dakly.colors.ink3, modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        s.label, Modifier.weight(1f), color = if (s.done) Dakly.colors.ink3 else Dakly.colors.ink,
+                        textDecoration = if (s.done) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
+                    )
+                    if (!s.required && !s.done) Text(stringResource(R.string.onboarding_optional), color = Dakly.colors.ink3, fontSize = 12.sp)
+                }
+            }
         }
     }
 }

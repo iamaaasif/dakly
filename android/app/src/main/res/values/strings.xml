@@ -374,4 +374,28 @@
         <item quantity="one">%1$s month</item>
         <item quantity="other">%1$s months</item>
     </plurals>
+    <string name="reset_title">Set a new password</string>
+    <string name="reset_body">Choose a new password for your Dakly account.</string>
+    <string name="reset_new">New password</string>
+    <string name="reset_save">Save and log in</string>
+    <string name="reset_done">Password changed. You\'re logged in.</string>
+    <string name="reset_back">Back to log in</string>
+    <string name="password_title">Change password</string>
+    <string name="password_subtitle">Other phones and computers will be logged out</string>
+    <string name="password_current">Current password</string>
+    <string name="password_new">New password</string>
+    <string name="password_save">Change password</string>
+    <string name="password_done">Password changed. Other devices are logged out.</string>
+    <string name="export_customers">Export customers (CSV)</string>
+    <string name="export_share">Share customer list</string>
+    <string name="export_failed">Could not export the customer list.</string>
+    <string name="onboarding_title">Get started</string>
+    <string name="onboarding_progress">%1$s of %2$s done</string>
+    <string name="onboarding_optional">Optional</string>
+    <string name="billing_payments">Payments and invoices</string>
+    <string name="billing_invoice">Invoice</string>
+    <string name="billing_status_paid">Paid</string>
+    <string name="billing_status_pending">Pending</string>
+    <string name="billing_status_failed">Failed</string>
+    <string name="settings_security">Login and security</string>
 </resources>

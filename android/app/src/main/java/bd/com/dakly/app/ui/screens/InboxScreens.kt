@@ -133,6 +133,7 @@ fun InboxScreen(nav: NavHostController, onUnread: (Int) -> Unit) {
 
 @Composable
 private fun ConversationRow(c: Conversation, onClick: () -> Unit) {
+    val ctx = LocalContext.current
     DCard(onClick = onClick, padding = 12.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Avatar(c.customer.name, 44.dp)
@@ -141,7 +142,7 @@ private fun ConversationRow(c: Conversation, onClick: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(c.customer.name, fontWeight = if (c.unread > 0) FontWeight.Bold else FontWeight.SemiBold,
                         maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                    Text(c.last?.at?.let { Format.relative(it) }.orEmpty(), color = Dakly.colors.ink3, fontSize = 11.5.sp)
+                    Text(c.last?.at?.let { Format.relative(ctx, it) }.orEmpty(), color = Dakly.colors.ink3, fontSize = 11.5.sp)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val prefix = if (c.last?.direction == "out") stringResource(R.string.inbox_you) + " " else ""

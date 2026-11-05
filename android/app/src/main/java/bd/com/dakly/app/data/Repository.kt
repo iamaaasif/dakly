@@ -38,6 +38,19 @@ class Repository(private val api: ApiClient, private val session: SessionStore) 
         loadMe()
     }
 
+    /** From the emailed /reset?token= link: sets the new password and signs in. */
+    suspend fun resetPassword(token: String, password: String) {
+        val r = api.send("POST", "api/v1/auth/reset", ResetBody(token, password), ResetBody.serializer(), TokenResponse.serializer())
+        session.save(r.token)
+        loadMe()
+    }
+
+    /** Other devices are signed out; this device keeps working with the new token. */
+    suspend fun changePassword(current: String, password: String) {
+        val r = api.send("POST", "api/v1/auth/password", ChangePasswordBody(current, password), ChangePasswordBody.serializer(), TokenResponse.serializer())
+        if (r.token.isNotBlank()) session.save(r.token)
+    }
+
     suspend fun forgot(email: String): Ok =
         api.send("POST", "api/v1/auth/forgot", EmailBody(email.trim()), EmailBody.serializer(), Ok.serializer())
 
@@ -107,6 +120,15 @@ class Repository(private val api: ApiClient, private val session: SessionStore) 
     /** Records a call/WhatsApp contact made from the phone, so it shows in the customer's conversation. */
     suspend fun logCall(id: String, how: String, note: String? = null): Created =
         api.send("POST", "api/v1/customers/$id/calls", CallLog(how, note = note), CallLog.serializer(), Created.serializer())
+
+    /** All customers as a CSV file in the app cache, ready to share. */
+    suspend fun exportCustomers(dir: File): File {
+        val (name, bytes) = api.download("api/v1/customers/export")
+        dir.mkdirs()
+        dir.listFiles()?.forEach { it.delete() }
+        val safe = (name ?: "dakly-customers.csv").replace(Regex("[^A-Za-z0-9._-]"), "_")
+        return File(dir, safe).also { it.writeBytes(bytes) }
+    }
 
     suspend fun importPreview(uri: Uri, name: String, mime: String): ImportPreview =
         api.upload("api/v1/customers/import", "file", name, mime, api.readUri(uri), emptyMap(), ImportPreview.serializer(), mapOf("dry" to 1))

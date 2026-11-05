@@ -214,7 +214,7 @@ private fun CountryPicker(value: String, onChange: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
             shape = MaterialTheme.shapes.medium,
         )
-        androidx.compose.material3.ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+        ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             signupCountries.forEach { c ->
                 DropdownMenuItem(text = { Text(label(c)) }, onClick = { onChange(c); open = false })
             }
@@ -245,5 +245,49 @@ fun ShopStatusScreen(status: String, reason: String?, onRetry: () -> Unit, onLog
         PrimaryButton(stringResource(R.string.status_check_again), Modifier.fillMaxWidth(), onClick = onRetry)
         Spacer(Modifier.height(8.dp))
         TextButton(onClick = onLogout) { Text(stringResource(R.string.logout), color = Dakly.colors.ink2) }
+    }
+}
+
+/** Opened from the emailed reset link: set a new password, then the app signs in. */
+@Composable
+fun ResetPasswordScreen(token: String, onDone: () -> Unit, onCancel: () -> Unit) {
+    val repo = LocalRepo.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var password by rememberSaveable { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    Box(Modifier.fillMaxSize().background(Dakly.colors.paper).systemBarsPadding().imePadding(), contentAlignment = Alignment.Center) {
+        Column(Modifier.widthIn(max = 460.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(20.dp)) {
+            DCard(padding = 22.dp) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Image(painterResource(R.drawable.logo), null, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
+                    Text(stringResource(R.string.reset_title), style = MaterialTheme.typography.headlineMedium)
+                    Text(stringResource(R.string.reset_body), color = Dakly.colors.ink2)
+                    Field(
+                        password, { password = it }, stringResource(R.string.reset_new), password = true,
+                        keyboard = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                        supporting = stringResource(R.string.auth_password_hint),
+                    )
+                    if (error != null) Text(error!!, color = Dakly.colors.dak)
+                    PrimaryButton(
+                        stringResource(R.string.reset_save), Modifier.fillMaxWidth(),
+                        enabled = password.length >= 8 && token.isNotBlank(), loading = busy,
+                    ) {
+                        busy = true; error = null
+                        scope.launch {
+                            try {
+                                repo.resetPassword(token, password)
+                                context.toast(context.getString(R.string.reset_done))
+                                onDone()
+                            } catch (e: Exception) { error = context.errorMessage(e) } finally { busy = false }
+                        }
+                    }
+                    TextButton(onClick = onCancel, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        Text(stringResource(R.string.reset_back), color = Dakly.colors.ink2)
+                    }
+                }
+            }
+        }
     }
 }

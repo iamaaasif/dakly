@@ -22,7 +22,7 @@ export const LIMITS = {
   register: [10, 3600], // per IP per hour
   forgotIp: [10, 3600], // per IP per hour
   forgotEmail: [3, 900], // per address per 15 min
-  api: [120, 60], // per account per minute
+  api: [Number(process.env.API_RATE_LIMIT_PER_MIN) || 120, 60], // per account per minute (API_RATE_LIMIT_PER_MIN raises it for app test runs)
   ai: [20, 60], // AI calls per shop per minute
   import: [10, 300], // file imports per shop per 5 min
   webhook: [600, 60], // per IP per minute

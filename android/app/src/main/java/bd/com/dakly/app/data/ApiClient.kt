@@ -106,6 +106,21 @@ class ApiClient(context: Context, base: String, private val session: SessionStor
         return call(build(url(path), method, rb), serializer)
     }
 
+    /** Raw bytes of a file download (e.g. the customers CSV) and the file name the server suggests. */
+    suspend fun download(path: String): Pair<String?, ByteArray> = withContext(Dispatchers.IO) {
+        val request = build(url(path), "GET", null)
+        val response = try { http.newCall(request).await() } catch (e: IOException) { throw OfflineException(e) }
+        response.use { r ->
+            if (!r.isSuccessful) {
+                val text = r.body?.string().orEmpty()
+                if (r.code == 401) signedOut(request)
+                throw parseError(r.code, text)
+            }
+            val name = r.header("Content-Disposition")?.let { Regex("filename=\"?([^\";]+)").find(it)?.groupValues?.get(1) }
+            name to (r.body?.bytes() ?: ByteArray(0))
+        }
+    }
+
     suspend fun <T> delete(path: String, serializer: KSerializer<T>): T =
         call(build(url(path), "DELETE", null), serializer)
 
@@ -133,22 +148,38 @@ class ApiClient(context: Context, base: String, private val session: SessionStor
     suspend fun readFile(file: File): ByteArray = withContext(Dispatchers.IO) { file.readBytes() }
 
     private suspend fun <T> call(request: Request, serializer: KSerializer<T>): T = withContext(Dispatchers.IO) {
-        val response = try {
+        var response = try {
             http.newCall(request).await()
         } catch (e: IOException) {
             throw OfflineException(e)
         }
+        // Too many requests: wait as the server asks (up to 10 s) and retry a read once. Writes are never repeated.
+        if (response.code == 429 && request.method == "GET") {
+            val wait = response.header("Retry-After")?.toLongOrNull()?.coerceIn(1, 10) ?: 2
+            response.close()
+            kotlinx.coroutines.delay(wait * 1000)
+            response = try { http.newCall(request.newBuilder().build()).await() } catch (e: IOException) { throw OfflineException(e) }
+        }
         response.use { r ->
             val text = r.body?.string().orEmpty()
             if (!r.isSuccessful) {
-                if (r.code == 401) {
-                    session.clear()
-                    _loggedOut.tryEmit(Unit)
-                }
+                if (r.code == 401) signedOut(request)
                 throw parseError(r.code, text)
             }
             if (text.isBlank()) DaklyJson.decodeFromString(serializer, "{}")
             else DaklyJson.decodeFromString(serializer, text)
+        }
+    }
+
+    /**
+     * The server rejected the token. Only sign out if it is still the token this request used: a request that
+     * started before a password change finishes with 401 and must not throw away the new token.
+     */
+    private suspend fun signedOut(request: Request) {
+        val used = request.header("Authorization")?.removePrefix("Bearer ")
+        if (used == null || used == session.peek()) {
+            session.clear()
+            _loggedOut.tryEmit(Unit)
         }
     }
 

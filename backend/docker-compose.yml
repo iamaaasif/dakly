@@ -18,7 +18,8 @@ services:
   app:
     build: .
     restart: unless-stopped
-    env_file: .env
+    # .env is made by ./setup.sh. Without it the app stops at startup and names the missing settings.
+    env_file: [{ path: .env, required: false }]
     environment:
       DATABASE_URL: postgresql://dakly:${POSTGRES_PASSWORD:-dakly}@db:5432/dakly
     # Reachable only from this machine; the public reaches Dakly through Caddy on ports 80/443

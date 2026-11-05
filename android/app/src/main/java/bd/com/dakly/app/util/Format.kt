@@ -1,7 +1,8 @@
 package bd.com.dakly.app.util
 
 import android.content.Context
-import android.text.format.DateUtils
+import android.icu.text.RelativeDateTimeFormatter
+import android.icu.util.ULocale
 import androidx.core.os.ConfigurationCompat
 import com.google.i18n.phonenumbers.NumberParseException
 import com.google.i18n.phonenumbers.PhoneNumberUtil
@@ -73,23 +74,45 @@ object Format {
     fun dateTime(context: Context, iso: String?): String {
         val i = parseInstant(iso) ?: return "–"
         return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-            .withLocale(locale(context)).format(i.atZone(shopZone))
+            .withLocale(locale(context)).withDecimalStyle(java.time.format.DecimalStyle.of(locale(context))).format(i.atZone(shopZone))
     }
 
     fun date(context: Context, iso: String?): String {
         val i = parseInstant(iso) ?: return "–"
-        return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale(context)).format(i.atZone(shopZone))
+        return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale(context)).withDecimalStyle(java.time.format.DecimalStyle.of(locale(context))).format(i.atZone(shopZone))
     }
 
-    /** "3 days ago", "in 2 hours", localized by Android. */
-    fun relative(iso: String?): String {
+    /** "3 days ago", "in 2 hours", in the app language (not the phone's), with the shop's digits. */
+    fun relative(context: Context, iso: String?, narrow: Boolean = false): String {
         val i = parseInstant(iso) ?: return "–"
-        return DateUtils.getRelativeTimeSpanString(i.toEpochMilli(), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString()
+        val diff = System.currentTimeMillis() - i.toEpochMilli()
+        val dir = if (diff >= 0) RelativeDateTimeFormatter.Direction.LAST else RelativeDateTimeFormatter.Direction.NEXT
+        val a = kotlin.math.abs(diff)
+        val f = RelativeDateTimeFormatter.getInstance(
+            ULocale.forLocale(locale(context)), null,
+            if (narrow) RelativeDateTimeFormatter.Style.NARROW else RelativeDateTimeFormatter.Style.LONG,
+            android.icu.text.DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE,
+        )
+        val min = 60_000L; val hour = 60 * min; val day = 24 * hour
+        return when {
+            a < min -> f.format(RelativeDateTimeFormatter.Direction.PLAIN, RelativeDateTimeFormatter.AbsoluteUnit.NOW)
+            a < hour -> f.format((a / min).toDouble(), dir, RelativeDateTimeFormatter.RelativeUnit.MINUTES)
+            a < day -> f.format((a / hour).toDouble(), dir, RelativeDateTimeFormatter.RelativeUnit.HOURS)
+            a < 7 * day -> f.format((a / day).toDouble(), dir, RelativeDateTimeFormatter.RelativeUnit.DAYS)
+            a < 30 * day -> f.format((a / (7 * day)).toDouble(), dir, RelativeDateTimeFormatter.RelativeUnit.WEEKS)
+            a < 365 * day -> f.format((a / (30 * day)).toDouble(), dir, RelativeDateTimeFormatter.RelativeUnit.MONTHS)
+            else -> f.format((a / (365 * day)).toDouble(), dir, RelativeDateTimeFormatter.RelativeUnit.YEARS)
+        }
     }
+
+    /** Material DatePicker works in UTC midnights: the shop's calendar day for [at] (or today) as that value. */
+    fun pickerDay(at: Instant? = null): Long =
+        (at?.atZone(shopZone)?.toLocalDate() ?: java.time.LocalDate.now(shopZone))
+            .atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
 
     fun time(context: Context, iso: String?): String {
         val i = parseInstant(iso) ?: return ""
-        return DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale(context)).format(i.atZone(shopZone))
+        return DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale(context)).withDecimalStyle(java.time.format.DecimalStyle.of(locale(context))).format(i.atZone(shopZone))
     }
 
     private val phones by lazy { PhoneNumberUtil.getInstance() }
