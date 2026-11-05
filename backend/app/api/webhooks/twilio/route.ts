@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const params = Object.fromEntries((await req.formData()).entries()) as Record<string, string>;
   const m = await db.campaignMessage.findUnique({ where: { id }, include: { campaign: { include: { shop: true } } } });
   if (!m) return twiml("");
-  const token = channelConfig(m.campaign.shop).voice?.token || "";
+  const token = channelConfig(m.campaign.shop).voice?.twilio?.token || "";
   const publicUrl = appUrl() + url.pathname + url.search;
   if (!validTwilioSignature(token, publicUrl, params, req.headers.get("x-twilio-signature"))) return new Response("Bad signature", { status: 403 });
 

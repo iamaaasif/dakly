@@ -14,7 +14,7 @@ It is a mobile-first web app (installable PWA) with a desktop layout, an admin b
 | Segments | VIP (15,000+ spent or 8+ orders), Inactive (no order in 60 days), New (first order in 30 days), Regular. Rules in `lib/segments.ts`. |
 | Campaigns | Segment, channel, AI-written message with `{name}`/`{নাম}` and `{product}`/`{পণ্য}` (a per-customer product pick), send now or schedule (AI suggests the best hour). Per-customer delivery, read and "interested" status, and sales attributed within 7 days. |
 | WhatsApp inbox | Incoming WhatsApp messages land in Inbox. Inside the 24-hour window the seller replies with free text; outside it Dakly sends the approved template. "AI writes a reply" drafts an answer from the knowledge base, the customer's orders and the conversation. Campaign messages show in each conversation too. |
-| Calls | AI voice calls through Twilio (Growth plan): OpenAI speaks the script in the shop's language and the customer presses 1 if interested. One-tap "Call" and "WhatsApp call / chat" buttons open the phone's dialer or WhatsApp, and the call is noted in the conversation. |
+| Calls | AI voice calls (Growth plan): OpenAI speaks the script in the shop's language and the customer presses 1 if interested. Bangladesh numbers go through Dakly's own Asterisk and a local SIP trunk (IPCallBD); other countries through Twilio. "Call us on WhatsApp": the shop's WhatsApp number as a link, a website button and an optional SMS line, so customers can call for free. One-tap "Call" and "WhatsApp call / chat" buttons open the phone's dialer or WhatsApp, and the call is noted in the conversation. |
 | AI knowledge | Per-shop products (with price), policies, FAQs, notes and brand voice. Every AI feature reads it and is told not to invent prices or rules. |
 | AI daily tips | Every morning (shop's local time) AI reads the shop's numbers, season and knowledge and gives 3 concrete actions, each opening a ready campaign. |
 | Facebook posts | AI writes a post from a brief and tone, the seller edits it and schedules it to their Page. |
@@ -48,7 +48,7 @@ On the shared Dakly number an incoming message goes to the shop that last messag
 
 **SMS.** Bangladesh: the BulkSMSBD-style HTTP gateway in `SMS_API_*` (countries in `SMS_GATEWAY_COUNTRIES`). Everywhere else: Twilio SMS with the Twilio keys. Other gateways: `lib/channels/sms.ts`.
 
-**AI voice call.** `OPENAI_API_KEY`, a Twilio number with Voice geo permission for the target countries, and a public https `APP_URL`.
+**AI voice call.** `OPENAI_API_KEY`, plus either or both of: the Asterisk container with a SIP trunk for `SIP_COUNTRIES` (default BD; see `deploy/asterisk/README.md`), and a Twilio number with Voice geo permission for other countries and a public https `APP_URL`. Test: `sh test/voice-sip.sh`.
 
 **WhatsApp calling.** Sellers call customers on WhatsApp from their own phone (the button opens WhatsApp). Server-side WhatsApp Business Calling (AI on a WhatsApp call) needs Meta's calling API, a customer call permission and a WebRTC/SIP media server; it is not in this release.
 
@@ -61,7 +61,7 @@ On the shared Dakly number an incoming message goes to the shop that last messag
 ## Code map
 
 - `app/(app)/` merchant pages; `app/admin/` back office; `app/privacy`, `app/delete-account` public pages
-- `app/actions.ts` server actions; `app/api/v1/` JSON API; `app/api/webhooks/` WhatsApp and Twilio
+- `app/actions.ts` server actions; `app/api/v1/` JSON API; `app/api/webhooks/` WhatsApp, Twilio and Asterisk
 - `lib/i18n/` languages, countries, money/date/phone formatting, STOP words; `lib/i18n/en.ts` English strings
 - `lib/config.ts` which credentials a shop uses; `lib/channels/*` WhatsApp, SMS (gateway + Twilio), voice
 - `lib/inbox.ts` conversations; `lib/knowledge.ts` AI knowledge; `lib/ai.ts` OpenAI; `lib/ai-insights.ts` daily tips

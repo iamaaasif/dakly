@@ -154,14 +154,14 @@ A `ChatMessage` has these fields:
 
 **24-hour window.** WhatsApp only allows free text within 24 hours of the customer's last message (`windowOpen`). Outside the window, `POST /inbox/:id` sends the shop's approved template with the text inside it (`kind: "template"`). Templates and SMS count toward the monthly message limit. Free replies inside the window do not. If the customer sent STOP, you can only reply while the window is open.
 
-**WhatsApp Business Calling.** Server-side WhatsApp calls are not available yet. Use the `wa.me` intent.
+**WhatsApp Business Calling.** Server-side WhatsApp calls are not available yet. Use the `wa.me` intent. For customers calling the shop, set `waCallNumber`: `/settings` returns the `wa.me` link, and with `waCallInSms` SMS campaigns end with it. Customer-started WhatsApp calls are free.
 
 ## Settings
 
 | Method and path | Body | Returns |
 | --- | --- | --- |
-| `GET /settings` | | `{ profile: { name, country, currency, timezone, language, brandVoice }, channels: { state: { wa, sms, voice } ("own"\|"platform"\|"off"), smsProvider, values, saved }, store: { type, url, syncedAt, error }, facebook: { connected, pageId, pageName }, options: { countries[{ code, name, currency, tz, lang }], languages[{ code, name }], currencies[] } }` |
-| `PATCH /settings` | any of `name, country, currency, timezone (IANA), language, brandVoice`, plus the channel fields `waPhoneNumberId, waAccessToken, waTemplateName, waTemplateLang, smsApiUrl, smsApiKey, smsSenderId, twilioSid, twilioToken, twilioFrom`, and `clearChannels: true` | `{ ok }` |
+| `GET /settings` | | `{ profile: { name, country, currency, timezone, language, brandVoice }, whatsappCall: { number, inSms, link }, channels: { state: { wa, sms, voice } ("own"\|"platform"\|"off"), smsProvider, values, saved }, store: { type, url, syncedAt, error }, facebook: { connected, pageId, pageName }, options: { countries[{ code, name, currency, tz, lang }], languages[{ code, name }], currencies[] } }` |
+| `PATCH /settings` | any of `name, country, currency, timezone (IANA), language, brandVoice, waCallNumber (or null), waCallInSms`, plus the channel fields `waPhoneNumberId, waAccessToken, waTemplateName, waTemplateLang, smsApiUrl, smsApiKey, smsSenderId, twilioSid, twilioToken, twilioFrom`, and `clearChannels: true` | `{ ok }` |
 | `POST /settings/store` | `{ storeType: "woocommerce"\|"shopify", storeUrl, storeKey, storeSecret? }` | `{ ok, message }`. Imports customers right away. |
 | `POST /settings/store/sync` | | `{ ok, message }` |
 | `DELETE /settings/store` | | `{ ok }` |

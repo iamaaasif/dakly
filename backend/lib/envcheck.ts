@@ -82,6 +82,11 @@ export function checkEnv(e: NodeJS.ProcessEnv = process.env): Check[] {
   if (smsGw && !raw(e, "SMS_SENDER_ID")) add("SMS gateway", "SMS_SENDER_ID", "warn", "Empty sender ID: many BD gateways reject messages without one.");
   const tw = group("Twilio", ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM"], { TWILIO_ACCOUNT_SID: [/^AC[0-9a-f]{32}$/i, "Should be AC followed by 32 letters/digits"], TWILIO_FROM: [/^\+\d{8,15}$/, "Use international format: +15551234567"], TWILIO_SMS_FROM: [/^(\+\d{8,15})?$/, "Use international format: +15551234567"] }, "Not set: AI voice calls and international SMS run in test mode.");
   if (tw && !set(e, "OPENAI_API_KEY")) add("Twilio", "OPENAI_API_KEY", "warn", "AI voice calls also need OPENAI_API_KEY (speech).");
+  const sip = group("Asterisk (SIP calls)", ["ASTERISK_ARI_URL", "ASTERISK_ARI_PASSWORD"], { ASTERISK_ARI_URL: [/^https?:\/\//, "Use the internal address, e.g. http://asterisk:8088"], SIP_NUMBER_FORMAT: [/^(intl|local|e164)?$/i, "Use intl, local or e164"], SIP_MAX_CALLS: [/^(\d+)?$/, "A whole number"] }, "Not set: AI voice calls to Bangladesh use Twilio if set.");
+  if (sip) {
+    if (!set(e, "SIP_TRUNK_HOST") || !set(e, "SIP_TRUNK_USER") || !set(e, "SIP_TRUNK_PASS")) add("Asterisk (SIP calls)", "SIP_TRUNK_HOST", "warn", "SIP_TRUNK_HOST, SIP_TRUNK_USER and SIP_TRUNK_PASS are read by the asterisk container; fill them in from IPCallBD.");
+    if (!set(e, "OPENAI_API_KEY")) add("Asterisk (SIP calls)", "OPENAI_API_KEY", "warn", "AI voice calls also need OPENAI_API_KEY (speech).");
+  }
   group("Facebook", ["FB_APP_ID", "FB_APP_SECRET"], { FB_APP_ID: [/^\d{5,20}$/, "Digits only (App ID)"] }, "Not set: merchants cannot connect a Facebook Page (posts fail with a clear reason).");
 
   const ssl = group("SSLCommerz", ["SSLCZ_STORE_ID", "SSLCZ_STORE_PASSWORD"], {}, "Not set: Bangladesh shops cannot pay online (they see 'contact support'; admins can still give plans by hand).");

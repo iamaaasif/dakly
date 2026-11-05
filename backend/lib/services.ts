@@ -212,6 +212,8 @@ export const profileSchema = z.object({
   timezone: z.string().trim().optional(),
   language: z.string().optional(),
   brandVoice: z.string().max(1500).nullable().optional(),
+  waCallNumber: z.string().max(40).nullable().optional(),
+  waCallInSms: z.boolean().optional(),
 });
 export async function updateProfile(shop: Shop, input: unknown): Promise<R<{ shop: Shop }>> {
   const p = profileSchema.safeParse(input);
@@ -220,9 +222,16 @@ export async function updateProfile(shop: Shop, input: unknown): Promise<R<{ sho
   if (d.timezone) { try { new Intl.DateTimeFormat("en", { timeZone: d.timezone }); } catch { return { error: await tr("Time zone ঠিক নেই") }; } }
   if (d.currency) { try { new Intl.NumberFormat("en", { style: "currency", currency: d.currency }); } catch { return { error: await tr("মুদ্রা ঠিক নেই") }; } }
   if (d.language !== undefined && !isLang(d.language)) return { error: await tr("ভাষা ঠিক নেই") };
-  const data: Record<string, string | null> = {};
+  const data: Record<string, string | boolean | null> = {};
   for (const k of ["name", "country", "currency", "timezone", "language"] as const) if (d[k]) data[k] = d[k]!;
   if (d.brandVoice !== undefined) data.brandVoice = d.brandVoice?.trim() || null;
+  if (d.waCallNumber !== undefined) {
+    const raw = d.waCallNumber?.trim() || "";
+    const n = raw ? normalizePhone(raw, d.country || shop.country) : null;
+    if (raw && !n) return { error: await tr("WhatsApp নম্বর ঠিক নেই") };
+    data.waCallNumber = n;
+  }
+  if (d.waCallInSms !== undefined) data.waCallInSms = d.waCallInSms;
   // Changing country alone moves currency and time zone to that country's defaults
   if (d.country && d.country !== shop.country && COUNTRIES[d.country]) {
     if (!d.currency || d.currency === shop.currency) data.currency = COUNTRIES[d.country].currency;

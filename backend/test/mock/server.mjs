@@ -64,6 +64,13 @@ function chatReply(body) {
   return `${bn ? "{নাম}" : "{name}"}, [mock-ai] ${user.split("\n").find((l) => /^(কী জানাতে চাই|What to say):/.test(l))?.split(":").slice(1).join(":").trim() ?? "offer"}`;
 }
 
+/** 2.5 s of a 440 Hz tone as raw 24 kHz 16-bit PCM: what OpenAI returns for response_format "pcm". */
+function tone() {
+  const sr = 24000, n = sr * 2.5, buf = Buffer.alloc(n * 2);
+  for (let i = 0; i < n; i++) buf.writeInt16LE(Math.round(9000 * Math.sin((2 * Math.PI * 440 * i) / sr)), i * 2);
+  return buf;
+}
+
 /* ---------- provider routes ---------- */
 async function route(host, method, path, q, b, req, res) {
   const auth = req.headers.authorization || "";
@@ -73,6 +80,7 @@ async function route(host, method, path, q, b, req, res) {
     if (path === "/v1/models") return send(res, 200, { data: [{ id: "gpt-4o-mini" }] });
     if (path === "/v1/chat/completions") return send(res, 200, { choices: [{ message: { content: chatReply(b) } }] });
     if (path === "/v1/audio/transcriptions") return send(res, 200, { text: "রহিম উদ্দিন জিরো ওয়ান সেভেন ওয়ান টু থ্রি ফোর ফাইভ সিক্স সেভেন এইট পাঞ্জাবি বত্রিশশো টাকা" });
+    if (path === "/v1/audio/speech" && b?.response_format === "pcm") return send(res, 200, tone(), "application/octet-stream");
     if (path === "/v1/audio/speech") return send(res, 200, Buffer.from("ID3mockmp3data"), "audio/mpeg");
   }
   // Meta Graph (WhatsApp Cloud API + Facebook Pages)

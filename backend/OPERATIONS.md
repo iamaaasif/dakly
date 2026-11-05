@@ -68,7 +68,7 @@ To add staff, go to **Admin, then Staff**. The person signs up first, or you add
 | Scheduled campaigns or posts never go out | System: scheduler last run. If it is old, restart the app. If you use `/api/cron` instead, check `RUN_SCHEDULER=false` and your cron job. |
 | AI writes generic text | `OPENAI_API_KEY` is missing, or the shop has no AI knowledge yet |
 | AI limit reached | The shop's monthly AI uses are used up. Upgrade the plan, or wait for the 1st of the month. |
-| Voice calls fail | Twilio geo permission for that country, `APP_URL` must be public https, and the shop must be on Growth |
+| Voice calls fail | Bangladesh: `docker compose ... exec asterisk asterisk -rx "pjsip show registrations"` must say Registered; the error on the call ("Call busy", "trunk unavailable") is Asterisk's reason. See `deploy/asterisk/README.md`. Other countries: Twilio geo permission, `APP_URL` must be public https. The shop must be on Growth. |
 | Stripe payment paid but plan not active | Webhook secret wrong. The return page also confirms, so ask the merchant to reload Billing. Check System errors. |
 | Facebook connect fails | App Review status, redirect URI, and that the user is a Page admin |
 

@@ -835,6 +835,30 @@ await t("R2", "Startup self-check ran against every provider and found them work
   eq(sc.env.filter((c) => c.level === "error"), []);
 });
 
+section("Y. Free WhatsApp calls (Call us on WhatsApp)");
+await t("Y1", "Shop sets its WhatsApp number; settings return the wa.me link; a bad number is refused", async () => {
+  const W = await newShop();
+  eq((await patch("/api/v1/settings", { waCallNumber: "12" }, { token: W.token })).status, 400);
+  eq((await patch("/api/v1/settings", { waCallNumber: "01712-345678", waCallInSms: true }, { token: W.token })).status, 200);
+  const g = await get("/api/v1/settings", { token: W.token });
+  eq(g.json.whatsappCall, { number: "8801712345678", inSms: true, link: "https://wa.me/8801712345678" });
+  eq((await patch("/api/v1/settings", { waCallNumber: null }, { token: W.token })).status, 200);
+  eq((await get("/api/v1/settings", { token: W.token })).json.whatsappCall.number, null);
+});
+await t("Y2", "SMS campaigns carry the free WhatsApp call link only when the shop turns it on", async () => {
+  const W = await newShop();
+  eq((await post("/api/v1/customers", { name: "Karim Mia", phone: "01811-000009" }, { token: W.token })).status, 201);
+  await patch("/api/v1/settings", { waCallNumber: "01712345678", waCallInSms: false }, { token: W.token });
+  await mock("/__reset", {});
+  await campaignDone(W.token, (await post("/api/v1/campaigns", { segment: "all", message: "{name}: offer today", channels: ["sms"] }, { token: W.token })).json.id);
+  ok(!(await mockLog("bulksmsbd.net"))[0].body.message.includes("wa.me"), "no link when off");
+  await patch("/api/v1/settings", { waCallInSms: true }, { token: W.token });
+  await mock("/__reset", {});
+  await campaignDone(W.token, (await post("/api/v1/campaigns", { segment: "all", message: "{name}: offer again", channels: ["sms"] }, { token: W.token })).json.id);
+  const m = (await mockLog("bulksmsbd.net"))[0].body.message;
+  ok(m.includes("WhatsApp-এ ফ্রি কল: wa.me/8801712345678"), m);
+});
+
 fs.mkdirSync("test/results", { recursive: true });
 fs.writeFileSync("test/results/api.json", JSON.stringify(results, null, 2));
 const failed = results.filter((r) => !r.ok);

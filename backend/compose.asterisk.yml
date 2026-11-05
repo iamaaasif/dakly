@@ -1,0 +1,36 @@
+# Asterisk for AI voice calls over your own SIP trunk (IPCallBD in Bangladesh). Add it to the stack:
+#   docker compose -f docker-compose.yml -f compose.asterisk.yml up -d --build asterisk
+#   (on the production server: -f compose.server.yml -f compose.asterisk.yml)
+# Settings come from .env (SIP_* and ASTERISK_*). See deploy/asterisk/README.md.
+# Only the SIP and RTP (voice) UDP ports are published. ARI (8088) stays inside the Docker network.
+services:
+  asterisk:
+    build: { context: ./deploy/asterisk }
+    restart: unless-stopped
+    environment:
+      SIP_TRUNK_HOST: ${SIP_TRUNK_HOST:-}
+      SIP_TRUNK_PORT: ${SIP_TRUNK_PORT:-5060}
+      SIP_TRUNK_USER: ${SIP_TRUNK_USER:-}
+      SIP_TRUNK_PASS: ${SIP_TRUNK_PASS:-}
+      SIP_AUTH_USER: ${SIP_AUTH_USER:-}
+      SIP_CALLER_ID: ${SIP_CALLER_ID:-}
+      SIP_FROM_USER: ${SIP_FROM_USER:-}
+      SIP_FROM_DOMAIN: ${SIP_FROM_DOMAIN:-}
+      SIP_REGISTER: ${SIP_REGISTER:-yes}
+      SIP_CODECS: ${SIP_CODECS:-alaw,ulaw}
+      SIP_DTMF_MODE: ${SIP_DTMF_MODE:-rfc4733}
+      SIP_TRANSPORT: ${SIP_TRANSPORT:-udp}
+      SIP_LOCAL_PORT: ${SIP_LOCAL_PORT:-5060}
+      SIP_RING_SECONDS: ${SIP_RING_SECONDS:-40}
+      SIP_KEY_WAIT_SECONDS: ${SIP_KEY_WAIT_SECONDS:-7}
+      ASTERISK_ARI_USER: ${ASTERISK_ARI_USER:-dakly}
+      ASTERISK_ARI_PASSWORD: ${ASTERISK_ARI_PASSWORD:-}
+      ASTERISK_PUBLIC_IP: ${ASTERISK_PUBLIC_IP:-}
+      ASTERISK_RTP_START: ${ASTERISK_RTP_START:-10000}
+      ASTERISK_RTP_END: ${ASTERISK_RTP_END:-10099}
+      # How Asterisk reaches Dakly inside the Docker network (speech files and call results)
+      DAKLY_INTERNAL_URL: ${DAKLY_INTERNAL_URL:-http://app:3000}
+    ports:
+      - "${SIP_LOCAL_PORT:-5060}:${SIP_LOCAL_PORT:-5060}/udp"
+      - "${ASTERISK_RTP_START:-10000}-${ASTERISK_RTP_END:-10099}:${ASTERISK_RTP_START:-10000}-${ASTERISK_RTP_END:-10099}/udp"
+    logging: { driver: json-file, options: { max-size: "20m", max-file: "3" } }

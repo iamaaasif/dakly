@@ -6,13 +6,14 @@ import { messageLimit, voiceAllowed } from "./plans";
 import { recommendationsFor } from "./recommend";
 import { sendWhatsApp } from "./channels/whatsapp";
 import { sendSms } from "./channels/sms";
-import { placeCall } from "./channels/voice";
+import { placeCall, RetryLater } from "./channels/voice";
 import { publishToPage } from "./facebook";
 import { syncDueStores } from "./stores";
 import { logError, setState } from "./audit";
 import { dailyTips, shopDay } from "./ai-insights";
 import { localHour } from "./i18n";
 import { smsFooter } from "./optout";
+import { waCallSmsLine } from "./wacall";
 import { dailyHousekeeping } from "./housekeeping";
 
 export const personalize = (text: string, name: string, product?: string | null, fallbackProduct = "আমাদের নতুন Collection") =>
@@ -83,13 +84,14 @@ export async function processQueue(limit = 60) {
       }
       let providerId = "";
       let status = "sent";
+      const waLine = shop.waCallInSms && shop.waCallNumber ? waCallSmsLine(shop.waCallNumber, shop.language) : "";
       let channel = m.channel;
       if (m.channel === "wa") {
         if (cfg.wa) providerId = await sendWhatsApp(cfg.wa, m.customer.phone, m.customer.name.split(" ")[0], text);
-        else if (m.campaign.channels.includes("sms") && cfg.sms) { providerId = await sendSms(cfg.sms, m.customer.phone, text + smsFooter(m.customerId, shop.language)); channel = "sms"; }
+        else if (m.campaign.channels.includes("sms") && cfg.sms) { providerId = await sendSms(cfg.sms, m.customer.phone, text + waLine + smsFooter(m.customerId, shop.language)); channel = "sms"; }
         else status = "test";
       } else if (m.channel === "sms") {
-        if (cfg.sms) providerId = await sendSms(cfg.sms, m.customer.phone, text + smsFooter(m.customerId, shop.language));
+        if (cfg.sms) providerId = await sendSms(cfg.sms, m.customer.phone, text + waLine + smsFooter(m.customerId, shop.language));
         else status = "test";
       } else if (m.channel === "voice") {
         if (cfg.voice && !voiceAllowed(shop)) throw new Error("AI Voice Call শুধু Growth Plan-এ");
@@ -101,6 +103,11 @@ export async function processQueue(limit = 60) {
       // Show it in the customer's conversation too (kind "campaign" is not counted twice)
       await db.chatMessage.create({ data: { shopId: shop.id, customerId: m.customerId, direction: "out", channel: channel === "voice" ? "call" : channel, kind: channel === "voice" ? "call" : "campaign", body: text, status, providerId: channel === "voice" ? null : providerId || null } });
     } catch (e) {
+      if (e instanceof RetryLater) {
+        // The phone line is full; the call goes out on a later round
+        await db.campaignMessage.update({ where: { id: m.id }, data: { status: "queued" } });
+        continue;
+      }
       await db.campaignMessage.update({ where: { id: m.id }, data: { status: "failed", error: String((e as Error).message).slice(0, 500) } });
       await logError(m.channel === "wa" ? "whatsapp" : m.channel, e, shop.id);
     }

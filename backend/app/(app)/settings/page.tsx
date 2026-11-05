@@ -8,6 +8,7 @@ import { decrypt } from "@/lib/crypto";
 import { getLoc } from "@/lib/i18n/server";
 import { DeleteAccountForm } from "@/components/DeleteAccountForm";
 import { PasswordForm } from "@/components/PasswordForm";
+import { WaCallForm } from "@/components/WaCallForm";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { handoffToken } from "@/lib/handoff";
@@ -60,6 +61,8 @@ export default async function Settings({ searchParams }: { searchParams: Promise
         {shop.storeType && <p className="muted">{t("শেষ Sync:")} {shop.storeSyncedAt ? f.dt(shop.storeSyncedAt) : t("এখনো হয়নি")}{shop.storeError ? ` · ${t("সমস্যা:")} ${shop.storeError}` : ""}</p>}
         <StoreForm connected={!!shop.storeType} type={shop.storeType ?? "woocommerce"} url={shop.storeUrl ?? ""} />
       </div>
+
+      <WaCallForm number={shop.waCallNumber ?? ""} inSms={shop.waCallInSms} />
 
       <SettingsForm
         values={{ name: shop.name, country: shop.country, currency: shop.currency, timezone: shop.timezone, language: shop.language, waPhoneNumberId: shop.waPhoneNumberId ?? "", waTemplateName: shop.waTemplateName ?? "", waTemplateLang: shop.waTemplateLang ?? "bn",

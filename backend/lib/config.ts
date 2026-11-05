@@ -10,10 +10,32 @@ export const env = (k: string) => {
   return v;
 };
 
+export type TwilioVoice = { kind: "twilio"; sid: string; token: string; from: string };
+/** Self-hosted Asterisk with a SIP trunk (IPCallBD in Bangladesh), driven over ARI. */
+export type SipVoice = { kind: "sip"; ariUrl: string; user: string; pass: string; countries: string[]; numberFormat: "intl" | "local" | "e164"; maxCalls: number };
+/** Voice providers for a shop. Calls go to `sip` for its countries and to `twilio` for the rest. */
+export type VoiceConfig = { twilio: TwilioVoice | null; sip: SipVoice | null; own: boolean };
+
+/** Platform Asterisk settings from the environment, or null when they are not set. */
+export function sipVoice(): SipVoice | null {
+  const url = env("ASTERISK_ARI_URL"), pass = env("ASTERISK_ARI_PASSWORD");
+  if (!url || !pass) return null;
+  const fmt = (process.env.SIP_NUMBER_FORMAT || "intl").trim().toLowerCase();
+  return {
+    kind: "sip",
+    ariUrl: url.replace(/\/$/, ""),
+    user: env("ASTERISK_ARI_USER") || "dakly",
+    pass,
+    countries: (process.env.SIP_COUNTRIES || "BD").split(",").map((c) => c.trim().toUpperCase()).filter(Boolean),
+    numberFormat: fmt === "local" || fmt === "e164" ? fmt : "intl",
+    maxCalls: Math.max(1, Number(process.env.SIP_MAX_CALLS) || 5),
+  };
+}
+
 export type ChannelConfig = {
   wa: { phoneNumberId: string; token: string; template: string; lang: string; own: boolean } | null;
   sms: ({ kind: "gateway"; url: string; key: string; sender: string } | { kind: "twilio"; sid: string; token: string; from: string }) & { own: boolean } | null;
-  voice: { sid: string; token: string; from: string; own: boolean } | null;
+  voice: VoiceConfig | null;
   fb: { pageId: string; token: string; name: string | null } | null;
 };
 
@@ -44,14 +66,18 @@ export function channelConfig(shop: Shop): ChannelConfig {
         ? { kind: "twilio", sid: twSid, token: twToken, from: twSmsFrom, own: !!shop.twilioSid }
         : null;
 
+  // Voice: a shop's own Twilio wins. Otherwise the platform Asterisk/SIP trunk calls its countries
+  // (SIP_COUNTRIES, default BD) and platform Twilio calls everywhere else.
   const voiceOwn = shop.twilioSid && shop.twilioToken && shop.twilioFrom;
-  const voiceBase = voiceOwn
-    ? { sid: shop.twilioSid!, token: decrypt(shop.twilioToken)!, from: shop.twilioFrom!, own: true }
+  const twilioVoice: TwilioVoice | null = voiceOwn
+    ? { kind: "twilio", sid: shop.twilioSid!, token: decrypt(shop.twilioToken)!, from: shop.twilioFrom! }
     : env("TWILIO_ACCOUNT_SID") && env("TWILIO_AUTH_TOKEN") && env("TWILIO_FROM")
-      ? { sid: env("TWILIO_ACCOUNT_SID")!, token: env("TWILIO_AUTH_TOKEN")!, from: env("TWILIO_FROM")!, own: false }
+      ? { kind: "twilio", sid: env("TWILIO_ACCOUNT_SID")!, token: env("TWILIO_AUTH_TOKEN")!, from: env("TWILIO_FROM")! }
       : null;
-  // Voice needs OpenAI for speech and a public URL for Twilio callbacks
-  const voice = voiceBase && env("OPENAI_API_KEY") && env("APP_URL") ? voiceBase : null;
+  const sip = voiceOwn ? null : sipVoice();
+  // Voice needs OpenAI for speech; Twilio also needs a public URL for its callbacks
+  const tw = twilioVoice && env("APP_URL") ? twilioVoice : null;
+  const voice = env("OPENAI_API_KEY") && (tw || sip) ? { twilio: tw, sip, own: !!voiceOwn } : null;
 
   const fb = shop.fbPageId && shop.fbPageToken ? { pageId: shop.fbPageId, token: decrypt(shop.fbPageToken)!, name: shop.fbPageName } : null;
 
